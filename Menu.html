@@ -1221,6 +1221,46 @@
       backdrop-filter:blur(6px);
     }
 
+    /* Modal de Upsell (Sacolinha) */
+    .upsell-modal {
+      position:fixed;
+      left:50%;
+      top:50%;
+      transform:translate(-50%, -50%) scale(.96);
+      width:min(400px, calc(100% - 20px));
+      z-index:151;
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(22,16,34,.98), rgba(16,12,24,.98));
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 30px 80px rgba(0,0,0,.45);
+      opacity:0;
+      pointer-events:none;
+      transition:.22s ease;
+      text-align: center;
+    }
+
+    .upsell-modal.open{
+      opacity:1;
+      pointer-events:auto;
+      transform:translate(-50%, -50%) scale(1);
+    }
+
+    .upsell-backdrop {
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.76);
+      backdrop-filter:blur(10px);
+      z-index:150;
+      opacity:0;
+      pointer-events:none;
+      transition:.2s ease;
+    }
+
+    .upsell-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
     @media (min-width:860px){
       .layout{
         grid-template-columns:1.08fr .92fr;
@@ -1563,13 +1603,29 @@
     </div>
   </div>
 
-  <!-- Modal da foto -->
   <div class="image-modal-backdrop" id="imageModalBackdrop"></div>
   <div class="image-modal" id="imageModal">
     <div class="image-modal-card">
       <button class="image-close" id="imageCloseBtn">✕</button>
       <img id="imageModalImg" src="" alt="">
       <div class="image-modal-caption" id="imageModalCaption"></div>
+    </div>
+  </div>
+
+  <div class="upsell-backdrop" id="upsellBackdrop"></div>
+  <div class="upsell-modal" id="upsellModal">
+    <div class="checkout-head" style="justify-content: center; border-bottom:none;">
+      <strong>Sacola Térmica Slim Fish ❄️</strong>
+    </div>
+    <div class="checkout-body" style="align-items: center; padding-top:0;">
+      <img src="logo.jpg" alt="Sacola Térmica" style="width: 140px; height: 140px; border-radius: 16px; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+      <p style="margin-top: 14px; color: var(--muted); font-size: 14px; line-height: 1.6;">
+        Deseja adicionar uma Sacola Térmica exclusiva ao seu pedido por apenas <strong>R$ 8,00</strong>? Ela garante que seus produtos cheguem na temperatura perfeita!
+      </p>
+      <div style="display:flex; flex-direction: column; gap:10px; margin-top: 18px; width: 100%;">
+        <button class="btn green" id="upsellYesBtn" style="width: 100%;">Sim, adicionar por R$ 8,00</button>
+        <button class="btn ghost" id="upsellNoBtn" style="width: 100%;">Não, obrigado</button>
+      </div>
     </div>
   </div>
 
@@ -1588,7 +1644,8 @@
       "frutos-do-mar":"🦐",
       "sashimi-bandeja":"🍣",
       "sushi-bento":"🥢",
-      "aperitivos":"🔥"
+      "aperitivos":"🔥",
+      "sacolinha-sf": "🛍️"
     };
 
     const MENU = [
@@ -1654,7 +1711,6 @@
           { code:32, id:"tentaculos-polvo", name:"Tentáculos de Polvo Cong.", desc:"Origem Portugal.", img:"IMG-PEIXES/tentaculo de polvo.jpg", details:["600g"], variants:[{label:"600g", price:169.00}] },
           { code:33, id:"polvo-inteiro-nacional", name:"Polvo Inteiro", desc:"Nacional fresco e eviscerado. Faixa de 2 a 3 kg.", img:"IMG-PEIXES/polvo inteiro fresco.jpgjpg", details:["2 a 3 Kg"], variants:[{label:"Peça", price:148.00}] },
           { code:34, id:"polvo-inteiro-espanhol", name:"Polvo Inteiro Cong.", desc:"Espanhol eviscerado. Faixa de 1,5 a 2 kg.", img:"IMG-PEIXES/polvo inteiro.jpg", details:["1,5 a 2 Kg"], variants:[{label:"Peça", price:168.00}] },
-          
           { code:36, id:"kani-kama", name:"Kani Kama Cong.", desc:"Muito usado em pratos orientais.", img:"IMG-PEIXES/kani kama.jpg", details:["250g"], variants:[{label:"250g", price:18.00}] },
           { code:37, id:"mexilhao", name:"Mexilhão Cong.", desc:"Venda por kg.", img:"IMG-PEIXES/mexilhao.jpg", details:["R$50/Kg"], variants:[{label:"1 Kg", price:50.00}] }
         ]
@@ -1695,6 +1751,14 @@
           { code:52, id:"bolinho-st-peter", name:"Bolinhos de St. Peter", desc:"Produto pronto.", img:"IMG-Peixes/bolinho st peter.jpg", details:["20 unidades", "350g"], variants:[{label:"20 unidades • 350g", price:22.00}] },
           { code:53, id:"croquete-salmao", name:"Croquete de Salmão", desc:"Para fritar.", img:"IMG-Peixes/croquete de salmão.jpg", details:["20 unidades", "350g"], variants:[{label:"20 unidades • 350g", price:24.00}] }
         ]
+      },
+      {
+        id:"sacolinha-sf",
+        title:"Sacolinha SF",
+        desc:"Nossa sacola térmica exclusiva para manter a qualidade e temperatura dos seus produtos.",
+        items:[
+          { code:99, id:"sacola-termica-sf", name:"Sacola Térmica Slim Fish", desc:"Ideal para manter a temperatura. Bonita e reutilizável.", img:"IMG_BANDEJAS/sacolinha.jpg", details:["1 unidade"], variants:[{label:"1 unidade", price:8.00}] }
+        ]
       }
     ];
 
@@ -1703,6 +1767,7 @@
     let routeInfo = null;
     let cepValidated = false;
     let forcedContinue = false;
+    let declinedUpsellBag = false;
 
     let currentImageModalId = null;
     let imageModalTimer = null;
@@ -1730,6 +1795,11 @@
     const modalBackdrop = document.getElementById("modalBackdrop");
     const checkoutModal = document.getElementById("checkoutModal");
     const closeModalBtn = document.getElementById("closeModalBtn");
+
+    const upsellBackdrop = document.getElementById("upsellBackdrop");
+    const upsellModal = document.getElementById("upsellModal");
+    const upsellYesBtn = document.getElementById("upsellYesBtn");
+    const upsellNoBtn = document.getElementById("upsellNoBtn");
 
     const customerName = document.getElementById("customerName");
     const customerCep = document.getElementById("customerCep");
@@ -1991,6 +2061,11 @@
       const variant = item.variants[variantIndex];
       const key = `${item.id}::${variant.label}`;
 
+      // Se o cliente adicionar a sacolinha manualmente, resetamos a variável de recusa
+      if (item.id === "sacola-termica-sf") {
+        declinedUpsellBag = false;
+      }
+
       const existing = cart.find(x => x.key === key);
       if(existing){
         existing.qty += 1;
@@ -2145,358 +2220,57 @@
     }
 
 
-function resolveRoute(addressData){
-  const city = normalizeText(addressData.localidade || "");
-  const bairro = normalizeText(addressData.bairro || "");
-  const uf = normalizeText(addressData.uf || "");
+    function resolveRoute(addressData){
+      const city = normalizeText(addressData.localidade || "");
+      const bairro = normalizeText(addressData.bairro || "");
+      const uf = normalizeText(addressData.uf || "");
 
-  if(uf !== "sp"){
-    return {
-      served:false,
-      name:"Fora da área atendida",
-      days:[],
-      note:"Atendimento somente nas regiões cadastradas em São Paulo.",
-      reason:"fora-da-regra"
-    };
-  }
+      if(uf !== "sp"){
+        return { served:false, name:"Fora da área atendida", days:[], note:"Atendimento somente nas regiões cadastradas em São Paulo.", reason:"fora-da-regra" };
+      }
 
-  /* =========================
-     REGIÕES NÃO ATENDIDAS
-  ========================= */
-  if(city.includes("guarulhos")){
-    return {
-      served:false,
-      name:"Guarulhos",
-      days:[],
-      note:"No momento Guarulhos não é atendido.",
-      reason:"nao-atende"
-    };
-  }
+      if(city.includes("guarulhos") || city.includes("embu") || city.includes("maua") || city.includes("mauá")){
+        return { served:false, name:"Região não atendida", days:[], note:"No momento esta região não é atendida.", reason:"nao-atende" };
+      }
 
-  if(city.includes("embu") || city.includes("embu das artes")){
-    return {
-      served:false,
-      name:"Embu",
-      days:[],
-      note:"No momento Embu não é atendido.",
-      reason:"nao-atende"
-    };
-  }
+      const zonaLesteAtualizada = ["mooca", "alto da mooca", "parque da mooca", "vila prudente", "parque sao lucas", "sao lucas", "vila ema", "agua rasa", "penha de franca", "penha de frança", "vila matilde"];
+      if (zonaLesteAtualizada.some(r => bairro.includes(r))) {
+        return { served:true, name:"Zona Leste (Mooca/VP/Penha/Matilde)", days:[1,6], note:"Atendimento às segundas e sábados.", reason:"rota-especifica" };
+      }
 
-  if(city.includes("maua") || city.includes("mauá") || city.includes("mauá")){
-    return {
-      served:false,
-      name:"Mauá",
-      days:[],
-      note:"No momento Mauá não é atendida.",
-      reason:"nao-atende"
-    };
-  }
+      if(bairro.includes("itaim bibi") || bairro.includes("butanta") || bairro.includes("butantã") || city.includes("osasco") || city.includes("taboao da serra") || bairro.includes("taboao")){
+        return { served:true, name:"Itaim/Butantã/Osasco/Taboão", days:[1,2,3,4,5,6], note:"Atendimento de segunda a sábado.", reason:"rota-especifica" };
+      }
 
-  /* =========================
-     ZONA LESTE ATUALIZADA
-     (baseado na imagem enviada)
-     MOOCA + VILA PRUDENTE +
-     PARQUE SÃO LUCAS +
-     PENHA DE FRANÇA +
-     VILA MATILDE
-     Regra: segunda e sábado
-  ========================= */
-  const zonaLesteAtualizada = [
-    "mooca",
-    "alto da mooca",
-    "parque da mooca",
-    "vila prudente",
-    "parque sao lucas",
-    "parque são lucas",
-    "sao lucas",
-    "são lucas",
-    "vila ema",
-    "agua rasa",
-    "água rasa",
-    "penha de franca",
-    "penha de frança",
-    "vila matilde"
-  ];
+      if(city.includes("cotia")){ return { served:true, name:"Cotia", days:[2,6], note:"Atendimento às terças e sábados.", reason:"rota-especifica" }; }
+      if(bairro.includes("vila joaniza")){ return { served:true, name:"Vila Joaniza", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" }; }
+      if(bairro.includes("interlagos") || bairro.includes("guarapiranga")){ return { served:true, name:"Interlagos / Guarapiranga", days:[1,3,5], note:"Atendimento às segundas, quartas e sextas.", reason:"rota-especifica" }; }
 
-  if (zonaLesteAtualizada.some(r => bairro.includes(r))) {
-    return {
-      served:true,
-      name:"Zona Leste (Mooca / Vila Prudente / Penha / Vila Matilde)",
-      days:[1,6],
-      note:"Atendimento às segundas e sábados para a região da Mooca, Vila Prudente, Parque São Lucas, Penha de França e Vila Matilde.",
-      reason:"rota-especifica"
-    };
-  }
+      const sbcBairros = ["baeta neves", "ferrazopolis", "ferrazópolis", "planalto", "demarchi", "centro"];
+      if (city.includes("sao bernardo do campo") || city.includes("são bernardo do campo")) {
+        if (sbcBairros.some(r => bairro.includes(r))) return { served:true, name:"São Bernardo do Campo", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" };
+        return { served:false, name:"São Bernardo do Campo", days:[], note:"Atendemos apenas bairros específicos.", reason:"fora-da-lista" };
+      }
 
-  /* =========================
-     ITAIM BIBI
-  ========================= */
-  if(bairro.includes("itaim bibi")){
-    return {
-      served:true,
-      name:"Itaim Bibi",
-      days:[1,2,3,4,5,6],
-      note:"Atendimento todos os dias úteis de segunda a sábado.",
-      reason:"rota-especifica"
-    };
-  }
+      const santoAndreBairros = ["vila assuncao", "vila assunção", "centro", "jardim", "campestre", "utinga", "jardim utinga", "jardim das maravilhas", "vila metalurgica", "vila metalúrgica", "vila camilopolis", "vila camilópolis", "parque das nacoes", "parque das nações", "vila lucinda", "vila francisco matarazzo", "vila bartira", "bangu", "vila sao pedro", "vila são pedro", "santa teresinha", "vila bastos", "vila guiomar"];
+      if (city.includes("santo andre") || city.includes("santo andré")) {
+        if (santoAndreBairros.some(r => bairro.includes(r))) return { served:true, name:"Santo André", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" };
+        return { served:false, name:"Santo André", days:[], note:"Atendemos apenas bairros específicos.", reason:"fora-da-lista" };
+      }
 
-  /* =========================
-     BUTANTÃ
-  ========================= */
-  if(
-    bairro.includes("butanta") ||
-    bairro.includes("butantã")
-  ){
-    return {
-      served:true,
-      name:"Butantã",
-      days:[1,2,3,4,5,6],
-      note:"Atendimento todos os dias úteis de segunda a sábado.",
-      reason:"rota-especifica"
-    };
-  }
+      const diademaBairros = ["centro", "conceicao", "conceição", "serraria"];
+      if (city.includes("diadema")) {
+        if (diademaBairros.some(r => bairro.includes(r))) return { served:true, name:"Diadema", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" };
+        return { served:false, name:"Diadema", days:[], note:"Atendemos apenas bairros específicos.", reason:"fora-da-lista" };
+      }
 
-  /* =========================
-     OSASCO
-  ========================= */
-  if(city.includes("osasco")){
-    return {
-      served:true,
-      name:"Osasco",
-      days:[1,2,3,4,5,6],
-      note:"Atendimento todos os dias úteis de segunda a sábado.",
-      reason:"rota-especifica"
-    };
-  }
+      if (city.includes("sao caetano do sul") || city.includes("são caetano do sul")){ return { served:true, name:"São Caetano do Sul", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" }; }
 
-  /* =========================
-     COTIA
-  ========================= */
-  if(city.includes("cotia")){
-    return {
-      served:true,
-      name:"Cotia",
-      days:[2,6],
-      note:"Atendimento às terças e sábados.",
-      reason:"rota-especifica"
-    };
-  }
+      const antigaZonaNorteLeste = ["tatuape", "tatuapé", "pirituba", "imirim", "tucuruvi", "santana"];
+      if (antigaZonaNorteLeste.some(r => bairro.includes(r))) return { served:true, name:"Zona Norte/Leste", days:[1,6], note:"Atendimento às segundas e sábados.", reason:"rota-especifica" };
 
-  /* =========================
-     TABOÃO DA SERRA
-  ========================= */
-  if(
-    city.includes("taboao da serra") ||
-    city.includes("taboão da serra") ||
-    bairro.includes("taboao") ||
-    bairro.includes("taboão")
-  ){
-    return {
-      served:true,
-      name:"Taboão",
-      days:[1,2,3,4,5,6],
-      note:"Atendimento todos os dias úteis de segunda a sábado.",
-      reason:"rota-especifica"
-    };
-  }
-
-  /* =========================
-     VILA JOANIZA
-  ========================= */
-  if(bairro.includes("vila joaniza")){
-    return {
-      served:true,
-      name:"Vila Joaniza",
-      days:[1,4],
-      note:"Atendimento às segundas e quintas.",
-      reason:"rota-especifica"
-    };
-  }
-
-  /* =========================
-     INTERLAGOS / GUARAPIRANGA
-  ========================= */
-  if(
-    bairro.includes("interlagos") ||
-    bairro.includes("guarapiranga")
-  ){
-    return {
-      served:true,
-      name:"Interlagos / Guarapiranga",
-      days:[1,3,5],
-      note:"Atendimento às segundas, quartas e sextas.",
-      reason:"rota-especifica"
-    };
-  }
-
-  /* =========================
-     ABC ATUALIZADO
-  ========================= */
-
-  // SÃO BERNARDO DO CAMPO
-  const sbcBairros = [
-    "baeta neves",
-    "ferrazopolis",
-    "ferrazópolis",
-    "planalto",
-    "demarchi",
-    "centro"
-  ];
-
-  if (
-    city.includes("sao bernardo do campo") ||
-    city.includes("são bernardo do campo")
-  ) {
-    if (sbcBairros.some(r => bairro.includes(r))) {
-      return {
-        served:true,
-        name:"São Bernardo do Campo",
-        days:[1,4],
-        note:"Atendimento em São Bernardo do Campo às segundas e quintas para os bairros cadastrados.",
-        reason:"rota-especifica"
-      };
+      return { served:false, name:"Região fora da rota cadastrada", days:[], note:"Sua região não está entre as rotas automáticas cadastradas.", reason:"fora-da-lista" };
     }
-
-    return {
-      served:false,
-      name:"São Bernardo do Campo",
-      days:[],
-      note:"Atendemos apenas bairros específicos de São Bernardo do Campo.",
-      reason:"fora-da-lista"
-    };
-  }
-
-  // SANTO ANDRÉ
-  const santoAndreBairros = [
-    "vila assuncao",
-    "vila assunção",
-    "centro",
-    "jardim",
-    "campestre",
-    "utinga",
-    "jardim utinga",
-    "jardim das maravilhas",
-    "vila metalurgica",
-    "vila metalúrgica",
-    "vila camilopolis",
-    "vila camilópolis",
-    "parque das nacoes",
-    "parque das nações",
-    "vila lucinda",
-    "vila francisco matarazzo",
-    "vila bartira",
-    "bangu",
-    "vila sao pedro",
-    "vila são pedro",
-    "santa teresinha",
-    "vila bastos",
-    "vila guiomar"
-  ];
-
-  if (
-    city.includes("santo andre") ||
-    city.includes("santo andré")
-  ) {
-    if (santoAndreBairros.some(r => bairro.includes(r))) {
-      return {
-        served:true,
-        name:"Santo André",
-        days:[1,4],
-        note:"Atendimento em Santo André às segundas e quintas para os bairros cadastrados.",
-        reason:"rota-especifica"
-      };
-    }
-
-    return {
-      served:false,
-      name:"Santo André",
-      days:[],
-      note:"Atendemos apenas bairros específicos de Santo André.",
-      reason:"fora-da-lista"
-    };
-  }
-
-  // DIADEMA
-  const diademaBairros = [
-    "centro",
-    "conceicao",
-    "conceição",
-    "serraria"
-  ];
-
-  if (city.includes("diadema")) {
-    if (diademaBairros.some(r => bairro.includes(r))) {
-      return {
-        served:true,
-        name:"Diadema",
-        days:[1,4],
-        note:"Atendimento em Diadema às segundas e quintas para os bairros cadastrados.",
-        reason:"rota-especifica"
-      };
-    }
-
-    return {
-      served:false,
-      name:"Diadema",
-      days:[],
-      note:"Atendemos apenas bairros específicos de Diadema.",
-      reason:"fora-da-lista"
-    };
-  }
-
-  // SÃO CAETANO DO SUL - tudo
-  if (
-    city.includes("sao caetano do sul") ||
-    city.includes("são caetano do sul")
-  ){
-    return {
-      served:true,
-      name:"São Caetano do Sul",
-      days:[1,4],
-      note:"Atendimento em São Caetano do Sul às segundas e quintas.",
-      reason:"rota-especifica"
-    };
-  }
-
-  /* =========================
-     REGIÕES ANTIGAS QUE VOCÊ
-     JÁ TINHA E CONTINUAM
-  ========================= */
-
-  // Santana / Tucuruvi / Pirituba / Imirim / Vila Matilde / Tatuapé
-  // OBS: Vila Matilde já foi puxada para a nova Zona Leste acima.
-  const antigaZonaNorteLeste = [
-    "tatuape",
-    "tatuapé",
-    "pirituba",
-    "imirim",
-    "tucuruvi",
-    "santana"
-  ];
-
-  if (antigaZonaNorteLeste.some(r => bairro.includes(r))) {
-    return {
-      served:true,
-      name:"Zona Norte / Leste",
-      days:[1,6],
-      note:"Atendimento às segundas e sábados.",
-      reason:"rota-especifica"
-    };
-  }
-
-  /* =========================
-     DEFAULT
-  ========================= */
-  return {
-    served:false,
-    name:"Região fora da rota cadastrada",
-    days:[],
-    note:"Sua região não está entre as rotas automáticas cadastradas.",
-    reason:"fora-da-lista"
-  };
-}
 
 
     function computeDeliveryInfo(route){
@@ -2743,6 +2517,13 @@ function resolveRoute(addressData){
         lines.push(`${index + 1}) #${item.code} ${item.qty}x ${item.name} — ${item.variantLabel} — ${money(effectivePrice)} un. = ${money(effectivePrice * item.qty)}${obs}`);
       });
 
+      // Se o cliente explicitamente recusou a sacola no popup e ela não está no carrinho
+      const hasBagInCart = cart.some(i => i.itemId === "sacola-termica-sf");
+      if (declinedUpsellBag && !hasBagInCart) {
+        lines.push("");
+        lines.push("📌 Observação: Cliente NÃO quer adicionar sacolinha térmica.");
+      }
+
       lines.push("");
       lines.push(`Subtotal: ${money(subtotal())}`);
       lines.push(`Frete: ${shipping === 0 ? "Grátis" : money(shipping)}`);
@@ -2780,6 +2561,7 @@ function resolveRoute(addressData){
       routeInfo = null;
       cepValidated = false;
       forcedContinue = false;
+      declinedUpsellBag = false;
 
       continueAnywayBtn.style.display = "none";
       cepResult.className = "checkout-result";
@@ -2803,37 +2585,62 @@ function resolveRoute(addressData){
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-sendWhatsBtn.addEventListener("click", () => {
-  if (!validateCheckoutData()) return;
+    function confirmAndSendWhats() {
+      const confirmSend = confirm("Tem certeza que deseja enviar a prévia no WhatsApp?");
+      if (!confirmSend) return;
 
-  const confirmSend = confirm("Tem certeza que deseja enviar a prévia no WhatsApp?");
-  if (!confirmSend) return;
+      const message = buildWhatsMessage();
+      const encoded = encodeURIComponent(message);
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  const message = buildWhatsMessage();
-  const encoded = encodeURIComponent(message);
+      showToast("✅ Abrindo o WhatsApp...");
 
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isMobile) {
+        window.location.href = `whatsapp://send?phone=${WHATS}&text=${encoded}`;
+        setTimeout(() => {
+          window.location.href = `https://wa.me/${WHATS}?text=${encoded}`;
+        }, 1200);
+      } else {
+        window.open(`https://wa.me/${WHATS}?text=${encoded}`, "_blank");
+      }
 
-  showToast("✅ Abrindo o WhatsApp...");
+      setTimeout(() => {
+        resetAll();
+      }, 3500);
+    }
 
-  if (isMobile) {
-    // tenta abrir o app
-    window.location.href = `whatsapp://send?phone=${WHATS}&text=${encoded}`;
+    // Modal Upsell Lógica
+    upsellYesBtn.addEventListener("click", () => {
+      const bagItem = getItemById("sacola-termica-sf");
+      if(bagItem) {
+        addToCart(bagItem, 0, ""); 
+      }
+      upsellBackdrop.classList.remove("open");
+      upsellModal.classList.remove("open");
+      confirmAndSendWhats();
+    });
 
-    // fallback para wa.me caso o app não abra
-    setTimeout(() => {
-      window.location.href = `https://wa.me/${WHATS}?text=${encoded}`;
-    }, 1200);
-  } else {
-    // desktop
-    window.open(`https://wa.me/${WHATS}?text=${encoded}`, "_blank");
-  }
+    upsellNoBtn.addEventListener("click", () => {
+      declinedUpsellBag = true;
+      upsellBackdrop.classList.remove("open");
+      upsellModal.classList.remove("open");
+      confirmAndSendWhats();
+    });
 
-  setTimeout(() => {
-    resetAll();
-  }, 3500);
-});
+    sendWhatsBtn.addEventListener("click", () => {
+      if (!validateCheckoutData()) return;
+      
+      const hasBagInCart = cart.some(i => i.itemId === "sacola-termica-sf");
 
+      if (!hasBagInCart) {
+        // Se a sacolinha não está no carrinho, abre a modal de Upsell
+        upsellBackdrop.classList.add("open");
+        upsellModal.classList.add("open");
+      } else {
+        // Se já está no carrinho, vai direto
+        confirmAndSendWhats();
+      }
+    });
 
     function highlightIncomingItem(){
       const params = new URLSearchParams(window.location.search);
