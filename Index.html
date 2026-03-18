@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <link rel="icon" type="image/png" href="logo.jpg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slim Fish</title>
+
+  <style>
+  :root{
+    --primary:#4b0082;
+    --primary-dark:#2a003d;
+    --accent:#9d4edd;
+
+    --brand-orange:#E06020;
+    --brand-orange-dark:#C94F17;
+
+    --google-blue:#4285F4;
+    --google-red:#EA4335;
+    --google-yellow:#FBBC05;
+    --google-green:#34A853;
+
+    --dark:#0f172a;
+    --light:#f8fafc;
+    --footer:#07060a;
+    --font:'Segoe UI', Arial, sans-serif;
+
+    --nav-font-mobile:18px;
+    --nav-font-desktop:22px;
+
+    --h2-mobile:28px;
+    --h2-desktop:38px;
+  }
+
+  *{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:var(--font);
+  }
+
+  html{
+    scroll-behavior:smooth;
+  }
+
+  body{
+    background:var(--light);
+    color:var(--dark);
+  }
+
+  body.modal-open{
+    overflow:hidden;
+  }
+
+  .fade{
+    opacity:0;
+    transform:translateY(28px);
+    transition:.8s ease;
+    will-change:opacity, transform;
+  }
+
+  .fade.show{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .menu-btn{
+    position:fixed;
+    top:18px;
+    left:18px;
+    width:54px;
+    height:54px;
+    border-radius:50%;
+    background:rgba(75,0,130,.95);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    z-index:1002;
+    cursor:pointer;
+    box-shadow:0 12px 28px rgba(0,0,0,.35);
+  }
+
+  .side-menu{
+    position:fixed;
+    inset:0;
+    background:linear-gradient(180deg, var(--primary), var(--primary-dark));
+    padding:28px 22px;
+    transform:translateX(-100%);
+    transition:.28s ease;
+    z-index:1001;
+    overflow:auto;
+  }
+
+  .side-menu.active{
+    transform:translateX(0);
+  }
+
+  .side-menu .brand{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:26px;
+  }
+
+  .side-menu .brand img{
+    width:56px;
+    height:56px;
+    border-radius:50%;
+    object-fit:cover;
+    background:#fff;
+    padding:2px;
+  }
+
+  .side-menu .brand strong{
+    color:#fff;
+    font-size:20px;
+    letter-spacing:.5px;
+  }
+
+  .side-menu a{
+    display:block;
+    color:#fff;
+    text-decoration:none;
+    font-size:var(--nav-font-mobile);
+    font-weight:600;
+    padding:14px 10px;
+    border-radius:12px;
+    transition:.2s;
+  }
+
+  .side-menu a:hover{
+    background:rgba(255,255,255,.08);
+    transform:translateX(4px);
+  }
+
+  nav{
+    display:none;
+  }
+
+  header{
+    height:100vh;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .hero-slider{
+    position:absolute;
+    inset:0;
+  }
+
+  .slide{
+    position:absolute;
+    inset:0;
+    background-size:cover;
+    background-position:center;
+    opacity:0;
+    transition:opacity 1s ease;
+    transform:scale(1.03);
+  }
+
+  .slide.active{
+    opacity:1;
+  }
+
+  .hero-overlay{
+    position:absolute;
+    inset:0;
+    background:linear-gradient(rgba(0,0,0,.58), rgba(0,0,0,.45));
+  }
+
+  .hero-content{
+    position:relative;
+    z-index:2;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:0 18px;
+  }
+
+  .hero-inner{
+    width:min(720px, 92vw);
+  }
+
+  .hero-logo{
+    width:96px;
+    height:96px;
+    border-radius:50%;
+    object-fit:cover;
+    background:#fff;
+    padding:3px;
+    box-shadow:0 12px 30px rgba(0,0,0,.35);
+    margin:0 auto 16px;
+  }
+
+  .hero-title{
+    color:#fff;
+    font-size:34px;
+    line-height:1.15;
+    font-weight:800;
+    letter-spacing:.3px;
+  }
+
+  .hero-sub{
+    color:rgba(255,255,255,.88);
+    font-size:15px;
+    line-height:1.55;
+    margin-top:10px;
+  }
+
+  .hero-cta{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-top:22px;
+  }
+
+  @media (max-width: 767px){
+    .hero-content{
+      padding-bottom:140px;
+      align-items:center;
+    }
+
+    .hero-title{
+      font-size:32px;
+    }
+  }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:14px 22px;
+    border-radius:999px;
+    text-decoration:none;
+    font-weight:900;
+    letter-spacing:.2px;
+    user-select:none;
+    box-shadow:0 14px 28px rgba(0,0,0,.32);
+    transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    position:relative;
+    overflow:visible;
+    border:none;
+    cursor:pointer;
+  }
+
+  .btn:hover{
+    transform:translateY(-3px);
+    box-shadow:0 18px 34px rgba(0,0,0,.36);
+  }
+
+  .btn:active{
+    transform:translateY(-1px) scale(.98);
+    filter:brightness(.95);
+  }
+
+  .btn.primary{
+    background:linear-gradient(135deg,var(--primary),var(--accent));
+    color:#fff;
+  }
+
+  .btn.ghost{
+    background:transparent;
+    border:2px solid rgba(255,255,255,.85);
+    color:#fff;
+  }
+
+  .btn.orange{
+    background:linear-gradient(135deg, var(--brand-orange), var(--brand-orange-dark));
+    color:#fff;
+    box-shadow:0 14px 30px rgba(224,96,32,.28), 0 14px 28px rgba(0,0,0,.25);
+  }
+
+  .btn.orange:hover{
+    box-shadow:0 18px 40px rgba(224,96,32,.35), 0 18px 34px rgba(0,0,0,.30);
+  }
+
+  .btn.light{
+    background:#fff;
+    color:var(--primary);
+    border:1px solid rgba(0,0,0,.08);
+  }
+
+  .btn.cta-glow{
+    background:linear-gradient(135deg, var(--primary), var(--accent));
+    color:#fff;
+  }
+
+  .btn.cta-glow.vibrate{
+    animation:shake 420ms ease-in-out 1;
+  }
+
+  @keyframes shake{
+    0%{ transform:translate(0); }
+    15%{ transform:translate(-3px); }
+    30%{ transform:translate(3px); }
+    45%{ transform:translate(-3px); }
+    60%{ transform:translate(3px); }
+    80%{ transform:translate(-1px); }
+    100%{ transform:translate(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .btn.cta-glow.vibrate{
+      animation:none !important;
+    }
+  }
+
+  .scroll-down{
+    position:absolute;
+    bottom:22px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:2;
+    color:#fff;
+    font-size:26px;
+    cursor:pointer;
+    animation:bounce 1.5s infinite;
+  }
+
+  @keyframes bounce{
+    0%,100%{ transform:translate(-50%,0); }
+    50%{ transform:translate(-50%,-10px); }
+  }
+
+  .tray{
+    padding:24px 0 10px;
+    background:linear-gradient(180deg, rgba(75,0,130,.05), rgba(157,78,221,.04));
+  }
+
+  .tray-title{
+    text-align:center;
+    padding:0 18px;
+    font-weight:900;
+    color:var(--primary);
+    margin-bottom:10px;
+    letter-spacing:.3px;
+  }
+
+  .tray-marquee{
+    overflow:hidden;
+    position:relative;
+    padding:10px 0 18px;
+    touch-action:pan-x;
+  }
+
+  .tray-track{
+    display:flex;
+    gap:14px;
+    width:max-content;
+    padding-left:14px;
+    will-change:transform;
+  }
+
+  .tray-item{
+    width:180px;
+    height:120px;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 12px 26px rgba(0,0,0,.18);
+    flex:0 0 auto;
+    background:#fff;
+    position:relative;
+    cursor:pointer;
+    transform:translateZ(0);
+    transition:transform .22s ease, box-shadow .22s ease;
+  }
+
+  .tray-item img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+  .tray-item:hover{
+    transform:translateY(-4px) scale(1.02);
+    box-shadow:0 16px 34px rgba(0,0,0,.22);
+  }
+
+  .tray-item .label{
+    position:absolute;
+    left:10px;
+    right:10px;
+    bottom:10px;
+    padding:8px 10px;
+    border-radius:12px;
+    background:rgba(0,0,0,.55);
+    color:#fff;
+    font-weight:900;
+    font-size:13px;
+    letter-spacing:.2px;
+    opacity:0;
+    transform:translateY(10px);
+    transition:.22s ease;
+    border:1px solid rgba(255,255,255,.14);
+    backdrop-filter:blur(8px);
+  }
+
+  .tray-item.selected{
+    transform:scale(1.06);
+    box-shadow:0 20px 45px rgba(0,0,0,.32);
+    z-index:2;
+  }
+
+  .tray-item.selected .label{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  section{
+    max-width:1200px;
+    margin:auto;
+    padding:70px 18px;
+  }
+
+  h2{
+    text-align:center;
+    color:var(--primary);
+    font-size:var(--h2-mobile);
+    margin-bottom:18px;
+    letter-spacing:.2px;
+  }
+
+  .p-center{
+    max-width:760px;
+    margin:0 auto;
+    text-align:center;
+    line-height:1.75;
+    font-size:15px;
+    opacity:.95;
+  }
+
+  .split{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:26px;
+    align-items:center;
+    margin-top:26px;
+  }
+
+  .card{
+    background:#fff;
+    border-radius:18px;
+    box-shadow:0 14px 34px rgba(0,0,0,.10);
+    padding:22px;
+  }
+
+  .split-img{
+    width:100%;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 18px 40px rgba(0,0,0,.14);
+  }
+
+  .split-img img{
+    width:100%;
+    height:100%;
+    display:block;
+    object-fit:cover;
+  }
+
+  /* AVALIAÇÕES */
+  .reviews-section{
+    background:linear-gradient(180deg, rgba(75,0,130,.04), rgba(224,96,32,.05));
+    border-radius:30px;
+    margin-top:30px;
+  }
+
+  .reviews-wrap{
+    margin-top:30px;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:24px;
+  }
+
+  .google-score-card{
+    background:#fff;
+    border-radius:24px;
+    padding:28px;
+    box-shadow:0 18px 40px rgba(0,0,0,.10);
+    border:1px solid rgba(0,0,0,.05);
+    position:relative;
+    overflow:hidden;
+  }
+
+  .google-score-card::before{
+    content:"";
+    position:absolute;
+    inset:0 auto 0 0;
+    width:6px;
+    background:linear-gradient(180deg, var(--google-blue), var(--google-green), var(--google-yellow), var(--google-red));
+  }
+
+  .google-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:18px;
+  }
+
+  .google-icon{
+    width:58px;
+    height:58px;
+    border-radius:18px;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 10px 24px rgba(0,0,0,.08);
+    border:1px solid rgba(0,0,0,.05);
+    font-size:30px;
+    font-weight:900;
+  }
+
+  .google-icon span:nth-child(1){ color:var(--google-blue); }
+  .google-icon span:nth-child(2){ color:var(--google-red); }
+  .google-icon span:nth-child(3){ color:var(--google-yellow); }
+  .google-icon span:nth-child(4){ color:var(--google-blue); }
+  .google-icon span:nth-child(5){ color:var(--google-green); }
+  .google-icon span:nth-child(6){ color:var(--google-red); }
+
+  .google-meta h3{
+    font-size:22px;
+    color:var(--dark);
+    margin-bottom:4px;
+  }
+
+  .google-meta p{
+    font-size:14px;
+    color:#475569;
+  }
+
+  .rating-row{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+    margin:18px 0 14px;
+  }
+
+  .rating-number{
+    font-size:48px;
+    font-weight:900;
+    color:var(--primary);
+    line-height:1;
+  }
+
+  .stars-block{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+
+  .stars{
+    color:#f5b301;
+    font-size:24px;
+    letter-spacing:2px;
+  }
+
+  .stars-caption{
+    color:#475569;
+    font-size:14px;
+    font-weight:600;
+  }
+
+  .review-cta{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:20px;
+  }
+
+  .review-list{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:18px;
+  }
+
+  .review-card{
+    background:#fff;
+    border-radius:22px;
+    padding:22px;
+    box-shadow:0 16px 34px rgba(0,0,0,.09);
+    border:1px solid rgba(0,0,0,.05);
+    transition:transform .22s ease, box-shadow .22s ease;
+  }
+
+  .review-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 20px 40px rgba(0,0,0,.12);
+  }
+
+  .review-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:14px;
+    margin-bottom:12px;
+  }
+
+  .review-user{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+
+  .review-avatar{
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    background:linear-gradient(135deg, var(--primary), var(--accent));
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+    font-size:18px;
+    box-shadow:0 10px 20px rgba(75,0,130,.20);
+  }
+
+  .review-user strong{
+    display:block;
+    font-size:16px;
+    color:var(--dark);
+  }
+
+  .review-user span{
+    font-size:13px;
+    color:#64748b;
+  }
+
+  .review-card .stars{
+    font-size:18px;
+    letter-spacing:1px;
+  }
+
+  .review-text{
+    color:#334155;
+    line-height:1.75;
+    font-size:15px;
+  }
+
+  .review-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin-top:14px;
+    padding:8px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:800;
+    background:rgba(52,168,83,.10);
+    color:#187a3f;
+  }
+
+  .reels-grid{
+    margin-top:22px;
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:12px;
+  }
+
+  .reel{
+    border-radius:18px;
+    overflow:hidden;
+    position:relative;
+    background:#000;
+    box-shadow:0 14px 30px rgba(0,0,0,.18);
+    border:1px solid rgba(0,0,0,.06);
+  }
+
+  .reel video{
+    width:100%;
+    aspect-ratio:9 / 16;
+    object-fit:cover;
+    display:block;
+  }
+
+  .reel .badge{
+    position:absolute;
+    top:10px;
+    left:10px;
+    background:rgba(0,0,0,.55);
+    color:#fff;
+    padding:8px 10px;
+    border-radius:999px;
+    font-weight:900;
+    font-size:12px;
+    border:1px solid rgba(255,255,255,.14);
+    backdrop-filter:blur(8px);
+  }
+
+  .center-actions{
+    display:flex;
+    justify-content:center;
+    margin-top:18px;
+  }
+
+  .contact-list{
+    margin-top:14px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    font-size:15px;
+  }
+
+  .contact-list a{
+    color:var(--primary);
+    text-decoration:none;
+    font-weight:800;
+  }
+
+  .contact-list a:hover{
+    text-decoration:underline;
+  }
+
+  @keyframes floatBtn{
+    0%{ transform:translateY(0); }
+    50%{ transform:translateY(-10px); }
+    100%{ transform:translateY(0); }
+  }
+
+  .float-stack{
+    position:fixed;
+    right:18px;
+    bottom:18px;
+    z-index:1000;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    transition:opacity .22s ease, transform .22s ease, filter .22s ease;
+  }
+
+  .float-stack.dim{
+    opacity:.38;
+    transform:translateY(10px);
+    filter:saturate(.92);
+  }
+
+  .floating-btn{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 16px 10px 10px;
+    border-radius:999px;
+    color:#fff;
+    text-decoration:none;
+    font-weight:900;
+    box-shadow:0 14px 30px rgba(0,0,0,.40);
+    animation:floatBtn 2s ease-in-out infinite;
+  }
+
+  .floating-btn:hover{
+    animation-play-state:paused;
+    transform:scale(1.03);
+  }
+
+  .floating-btn .icon{
+    width:38px;
+    height:38px;
+    background:#fff;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .floating-btn .icon img{
+    width:22px;
+    height:22px;
+  }
+
+  .floating-btn.whats{
+    background:linear-gradient(135deg,var(--primary),var(--accent));
+  }
+
+  .floating-btn.biz{
+    background:linear-gradient(135deg, var(--brand-orange), var(--brand-orange-dark));
+  }
+
+  footer{
+    background:var(--footer);
+    color:#fff;
+    padding:34px 18px;
+    margin-top:10px;
+  }
+
+  .footer-wrap{
+    max-width:1200px;
+    margin:auto;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:18px;
+  }
+
+  .footer-brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+
+  .footer-brand img{
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    object-fit:cover;
+    background:#fff;
+    padding:2px;
+  }
+
+  .footer-brand strong{
+    font-size:18px;
+    letter-spacing:.3px;
+  }
+
+  .footer-links{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    font-size:14px;
+    opacity:.92;
+  }
+
+  .footer-links a{
+    color:#fff;
+    text-decoration:none;
+    font-weight:700;
+  }
+
+  .footer-links a:hover{
+    text-decoration:underline;
+  }
+
+  .footer-bottom{
+    border-top:1px solid rgba(255,255,255,.12);
+    padding-top:16px;
+    font-size:13px;
+    opacity:.9;
+  }
+
+  /* MODAL DA BANDEJA */
+  .tray-modal{
+    position:fixed;
+    inset:0;
+    z-index:3000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease;
+  }
+
+  .tray-modal.open{
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  .tray-modal-backdrop{
+    position:absolute;
+    inset:0;
+    background:rgba(8,10,20,.48);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+  }
+
+  .tray-modal-card{
+    position:relative;
+    width:min(460px, 100%);
+    background:rgba(255,255,255,.96);
+    border-radius:28px;
+    box-shadow:0 30px 70px rgba(0,0,0,.28);
+    overflow:hidden;
+    transform:translateY(22px) scale(.96);
+    transition:transform .28s ease;
+  }
+
+  .tray-modal.open .tray-modal-card{
+    transform:translateY(0) scale(1);
+  }
+
+  .tray-modal-photo{
+    position:relative;
+    height:240px;
+    background:#f1f5f9;
+  }
+
+  .tray-modal-photo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+  .tray-modal-badge{
+    position:absolute;
+    top:14px;
+    left:14px;
+    background:rgba(255,255,255,.88);
+    color:var(--primary);
+    border:1px solid rgba(75,0,130,.10);
+    box-shadow:0 10px 24px rgba(0,0,0,.12);
+    border-radius:999px;
+    padding:9px 14px;
+    font-size:12px;
+    font-weight:900;
+  }
+
+  .tray-modal-close{
+    position:absolute;
+    top:14px;
+    right:14px;
+    width:42px;
+    height:42px;
+    border:none;
+    border-radius:50%;
+    background:rgba(15,23,42,.70);
+    color:#fff;
+    font-size:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    box-shadow:0 10px 24px rgba(0,0,0,.24);
+  }
+
+  .tray-modal-body{
+    padding:22px 20px 24px;
+    text-align:center;
+  }
+
+  .tray-modal-body h3{
+    font-size:26px;
+    line-height:1.15;
+    color:var(--primary);
+    margin-bottom:10px;
+  }
+
+  .tray-modal-body p{
+    color:#475569;
+    line-height:1.65;
+    font-size:14px;
+  }
+
+  .tray-modal-actions{
+    display:grid;
+    gap:12px;
+    margin-top:20px;
+  }
+
+  .tray-modal-hint{
+    margin-top:12px;
+    font-size:12px;
+    color:#64748b;
+    opacity:.95;
+  }
+
+  @media (min-width: 768px){
+    .menu-btn,
+    .side-menu{
+      display:none;
+    }
+
+    nav{
+      display:flex;
+      position:fixed;
+      top:0;
+      width:100%;
+      z-index:1005;
+      background:rgba(75,0,130,.82);
+      backdrop-filter:blur(10px);
+      padding:12px 40px;
+      align-items:center;
+      justify-content:space-between;
+      box-shadow:0 8px 22px rgba(0,0,0,.18);
+    }
+
+    nav .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    nav .brand img{
+      width:52px;
+      height:52px;
+      border-radius:50%;
+      object-fit:cover;
+      background:#fff;
+      padding:2px;
+    }
+
+    nav .links{
+      display:flex;
+      gap:26px;
+    }
+
+    nav a{
+      color:#fff;
+      text-decoration:none;
+      font-size:var(--nav-font-desktop);
+      font-weight:900;
+      position:relative;
+      padding:6px 0;
+    }
+
+    nav a::after{
+      content:"";
+      position:absolute;
+      left:0;
+      bottom:-4px;
+      width:0;
+      height:2px;
+      background:linear-gradient(90deg, #9d4edd, #ffffff);
+      transition:.3s;
+      border-radius:2px;
+    }
+
+    nav a:hover::after{
+      width:100%;
+    }
+
+    h2{
+      font-size:var(--h2-desktop);
+    }
+
+    .hero-title{
+      font-size:56px;
+    }
+
+    .hero-sub{
+      font-size:18px;
+    }
+
+    .split{
+      grid-template-columns:1.05fr .95fr;
+      gap:42px;
+    }
+
+    .reels-grid{
+      grid-template-columns:repeat(4, 1fr);
+    }
+
+    .reviews-wrap{
+      grid-template-columns:340px 1fr;
+      align-items:start;
+    }
+
+    .review-list{
+      grid-template-columns:repeat(3, 1fr);
+    }
+
+    .footer-wrap{
+      grid-template-columns:1.2fr 1fr 1fr;
+      align-items:start;
+    }
+
+    .tray-modal-actions{
+      grid-template-columns:1fr 1fr;
+    }
+
+    .tray-modal-body{
+      padding:24px 24px 26px;
+    }
+  }
+
+  nav a.active::after{
+    width:100% !important;
+  }
+
+  .section-indicator{
+    position:fixed;
+    top:18px;
+    right:18px;
+    z-index:1003;
+    padding:10px 14px;
+    border-radius:999px;
+    background:rgba(0,0,0,.42);
+    color:#fff;
+    border:1px solid rgba(255,255,255,.12);
+    backdrop-filter:blur(10px);
+    box-shadow:0 14px 30px rgba(0,0,0,.30);
+    font-weight:900;
+    letter-spacing:.2px;
+    font-size:13px;
+    opacity:0;
+    transform:translateY(-10px);
+    transition:opacity .22s ease, transform .22s ease;
+    pointer-events:none;
+  }
+
+  @media (max-width: 767px){
+    .section-indicator.show{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    .tray-modal-photo{
+      height:220px;
+    }
+
+    .tray-modal-body h3{
+      font-size:22px;
+    }
+  }
+
+  @media (min-width: 768px){
+    .section-indicator{
+      display:none;
+    }
+  }
+  </style>
+</head>
+
+<body>
+
+  <div class="menu-btn" onclick="toggleMenu()">☰</div>
+
+  <div class="side-menu" id="sideMenu">
+    <div class="brand">
+      <img src="logo.jpg" alt="Slim Fish">
+      <strong>Slim Fish</strong>
+    </div>
+
+    <a href="#inicio" onclick="toggleMenu()">Início</a>
+    <a href="#bandeja" onclick="toggleMenu()">Produtos</a>
+    <a href="#avaliacoes" onclick="toggleMenu()">Avaliações</a>
+    <a href="#cardapio" onclick="toggleMenu()">Cardápio</a>
+    <a href="#sobre" onclick="toggleMenu()">Sobre Nós</a>
+    <a href="#redes" onclick="toggleMenu()">Redes Sociais</a>
+    <a href="#contato" onclick="toggleMenu()">Contate-nos</a>
+  </div>
+
+  <div class="section-indicator" id="sectionIndicator">Início</div>
+
+  <nav>
+    <div class="brand">
+      <img src="logo.jpg" alt="Slim Fish">
+      <strong style="color:#fff;">Slim Fish</strong>
+    </div>
+    <div class="links">
+      <a href="#inicio">Início</a>
+      <a href="#bandeja">Produtos</a>
+      <a href="#avaliacoes">Avaliações</a>
+      <a href="#cardapio">Cardápio</a>
+      <a href="#sobre">Sobre Nós</a>
+      <a href="#redes">Redes</a>
+      <a href="#contato">Contato</a>
+    </div>
+  </nav>
+
+  <header id="inicio">
+    <div class="hero-slider">
+      <div class="slide active" style="background-image:url('IMG-Peixes/img18.jpeg')"></div>
+      <div class="slide" style="background-image:url('IMG-Peixes/img19.jpeg')"></div>
+      <div class="slide" style="background-image:url('IMG-Peixes/img20.jpeg')"></div>
+      <div class="slide" style="background-image:url('IMG-Peixes/img23.jpeg')"></div>
+      <div class="slide" style="background-image:url('IMG-Peixes/img26.jpeg')"></div>
+      <div class="slide" style="background-image:url('IMG-Peixes/img27.jpeg')"></div>
+      <div class="slide" style="background-image:url('IMG-Peixes/img36.jpeg')"></div>
+    </div>
+
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+      <div class="hero-inner fade" id="heroTop">
+        <img class="hero-logo" src="logo.jpg" alt="Slim Fish">
+        <div class="hero-title">Pescados frescos e congelados para sua casa ou para o seu negócio</div>
+        <div class="hero-sub">Tradição, procedência e excelência do início ao fim. Faça seu pedido com facilidade.</div>
+
+        <div class="hero-cta">
+          <a class="btn primary cta-glow" id="ctaFazerPedido" href="Pedido.html">Fazer pedido</a>
+          <a class="btn ghost" href="Cardapio.html">Ver cardápio</a>
+          <a class="btn orange" href="Empresas.html">Para seu negócio</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-down" onclick="document.getElementById('bandeja').scrollIntoView({behavior:'smooth'})">⬇</div>
+  </header>
+
+  <div id="bandeja" class="tray fade">
+    <div class="tray-title">Nossa bandeja de pescados</div>
+
+    <div class="tray-marquee" id="trayMarquee">
+      <div class="tray-track" id="trayTrack">
+        <div class="tray-item" data-title="Atum em Cubos" data-image="IMG_BANDEJAS/Atum em Cubos.jpeg">
+          <img src="IMG_BANDEJAS/Atum em Cubos.jpeg" alt="Atum em Cubos">
+          <div class="label">Atum em Cubos</div>
+        </div>
+
+        <div class="tray-item" data-title="Atum Picado" data-image="IMG_BANDEJAS/Atum Picado.jpeg">
+          <img src="IMG_BANDEJAS/Atum Picado.jpeg" alt="Atum Picado">
+          <div class="label">Atum Picado</div>
+        </div>
+
+        <div class="tray-item" data-title="Camarão Cinza" data-image="IMG_BANDEJAS/Camarão cinza.jpeg">
+          <img src="IMG_BANDEJAS/Camarão cinza.jpeg" alt="Camarão Cinza">
+          <div class="label">Camarão Cinza</div>
+        </div>
+
+        <div class="tray-item" data-title="Camarão Rosa" data-image="IMG_BANDEJAS/Camarão rosa.jpeg">
+          <img src="IMG_BANDEJAS/Camarão rosa.jpeg" alt="Camarão Rosa">
+          <div class="label">Camarão Rosa</div>
+        </div>
+
+       <!-- <div class="tray-item" data-title="File de Atum posta" data-image="IMG_BANDEJAS/File de ATUM posta.jpeg">
+          <img src="IMG_BANDEJAS/File de ATUM posta.jpeg" alt="File de Atum posta">
+          <div class="label">File de Atum posta</div>
+        </div> -->
+
+        <div class="tray-item" data-title="filé de linguado" data-image="IMG_BANDEJAS/File de linguado.jpeg">
+          <img src="IMG_BANDEJAS/File de linguado.jpeg" alt="File de linguado">
+          <div class="label">filé de linguado</div>
+        </div>
+
+        <div class="tray-item" data-title="Filé de pescada fresca" data-image="IMG_BANDEJAS/File de pescada fresca.jpeg">
+          <img src="IMG_BANDEJAS/File de pescada fresca.jpeg" alt="Filé de pescada fresca">
+          <div class="label">Filé de pescada fresca</div>
+        </div>
+
+        <div class="tray-item" data-title="Filé de tilápia fresca" data-image="IMG_BANDEJAS/File de tilápia fresca.jpeg">
+          <img src="IMG_BANDEJAS/File de tilápia fresca.jpeg" alt="Filé de tilápia fresca">
+          <div class="label">Filé de tilápia fresca</div>
+        </div>
+
+        <div class="tray-item" data-title="Hamburguer de salmão" data-image="IMG_BANDEJAS/Hamburger de salmão.jpeg">
+          <img src="IMG_BANDEJAS/Hamburger de salmão.jpeg" alt="Hamburguer de salmão">
+          <div class="label">Hamburguer de salmão</div>
+        </div>
+
+        <div class="tray-item" data-title="Hamburguer de tilápia" data-image="IMG_BANDEJAS/Hamburger de tilápia.jpeg">
+          <img src="IMG_BANDEJAS/Hamburger de tilápia.jpeg" alt="Hamburguer de tilápia">
+          <div class="label">Hamburguer de tilápia</div>
+        </div>
+
+        <div class="tray-item" data-title="Lombo de Salmão" data-image="IMG_BANDEJAS/Lombo de Salmão.jpeg">
+          <img src="IMG_BANDEJAS/Lombo de Salmão.jpeg" alt="Lombo de Salmão">
+          <div class="label">Lombo de Salmão</div>
+        </div>
+
+        <div class="tray-item" data-title="Salmão em Cubos" data-image="IMG_BANDEJAS/Salmão em cubos.jpeg">
+          <img src="IMG_BANDEJAS/Salmão em cubos.jpeg" alt="Salmão em Cubos">
+          <div class="label">Salmão em Cubos</div>
+        </div>
+         <div class="tray-item" data-title="Salmão Picado" data-image="IMG_BANDEJAS/Salmão Picado.jpeg">
+          <img src="IMG_BANDEJAS/Salmão Picado.jpeg" alt="Salmão Picado">
+          <div class="label">Salmão Picado</div>
+        </div>
+         <div class="tray-item" data-title="ST PETER em cubos" data-image="IMG_BANDEJAS/ST PETER EM CUBOS.jpeg">
+          <img src="IMG_BANDEJAS/ST PETER EM CUBOS.jpeg" alt="ST PETER em cubos">
+          <div class="label">ST PETER em cubos</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section id="avaliacoes" class="fade reviews-section">
+    <h2>Avaliações</h2>
+    <p class="p-center">
+      A confiança dos nossos clientes é um dos nossos maiores orgulhos. Veja alguns elogios e, se já comprou com a gente, deixe sua avaliação.
+    </p>
+
+    <div class="reviews-wrap">
+      <div class="google-score-card fade">
+        <div class="google-head">
+          <div class="google-icon" aria-label="Google">
+            <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
+          </div>
+
+          <div class="google-meta">
+            <h3>Slim Fish no Google</h3>
+            <p>4,7 Com 22 avaliações no Google Peixaria</p>
+          </div>
+        </div>
+
+        <div class="rating-row">
+          <div class="rating-number">4.7</div>
+          <div class="stars-block">
+            <div class="stars">★★★★★</div>
+            <div class="stars-caption">Baseado nas avaliações dos clientes</div>
+          </div>
+        </div>
+
+        <p style="line-height:1.75; color:#475569; font-size:15px;">
+          Qualidade, frescor, atendimento e confiança. Buscamos entregar a melhor experiência em pescados para sua casa e para o seu negócio.
+        </p>
+
+        <div class="review-cta">
+          <a class="btn primary" href="https://www.google.com/search?sca_esv=ad51375bc05ed99f&sxsrf=ANbL-n4W97jU0gaEK33xPzhxd9aCGRkJow:1773073099782&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOctMBXAi-tUXPSQeTSLZ7J5Ed26t8hvv3C6ja_Dtz5uHMn_TMQ_MLK_tin2Jyhcd_48kR60AxkcDELj4_HuxD0uV5K8c&q=Slim+Fish+Coment%C3%A1rios&sa=X&ved=2ahUKEwjczpeCnJOTAxWIHLkGHQWuG84Q0bkNegQIJRAF&biw=1920&bih=945&dpr=1" target="_blank" rel="noopener">
+            Ver página no Google
+          </a>
+
+          <a class="btn orange" href="https://www.google.com/search?sca_esv=ad51375bc05ed99f&sxsrf=ANbL-n69FE28IXqj0jbmwZgmA8ncRV_H6Q:1773073433166&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOctMBXAi-tUXPSQeTSLZ7J5Ed26t8hvv3C6ja_Dtz5uHMn_TMQ_MLK_tin2Jyhcd_48kR60AxkcDELj4_HuxD0uV5K8c&q=Slim+Fish+Coment%C3%A1rios&sa=X&ved=2ahUKEwjP3ZOhnZOTAxXrIbkGHZ9VGmgQ0bkNegQIIhAF&cshid=1773073507448198&biw=1920&bih=945&dpr=1#cobssid=s&lrd=0x94ce540ac382ba49:0xf111805ba134bfcc,3,,,," target="_blank" rel="noopener">
+            Deixe seu comentário
+          </a>
+        </div>
+      </div>
+
+      <div class="review-list">
+        <article class="review-card fade">
+          <div class="review-top">
+            <div class="review-user">
+              <div class="review-avatar">M</div>
+              <div>
+                <strong>Roseli Luiz da Silva</strong>
+                <span>Local Guide·59 avaliações·47 fotos</span>
+              </div>
+            </div>
+            <div class="stars">★★★★★</div>
+          </div>
+
+          <p class="review-text">
+            Simplesmente "fresco" 🤣 como peixe deve ser. Tudo delicioso, saudável, bem embalado e com entrega😃. Comodidade, no conforto de seu lar. Preço justo💲. Experimente!!!
+          </p>
+
+          <div class="review-badge">✔ Elogio em destaque</div>
+        </article>
+
+        <article class="review-card fade">
+          <div class="review-top">
+            <div class="review-user">
+              <div class="review-avatar">R</div>
+              <div>
+                <strong>Matheus Silva</strong>
+                <span>Local Guide·67 avaliações·16 fotos</span>
+              </div>
+            </div>
+            <div class="stars">★★★★★</div>
+          </div>
+
+          <p class="review-text">
+            Produto fresco de qualidade. A muitos anos fornecem para restaurantes. Indico.
+          </p>
+
+          <div class="review-badge">✔ Qualidade e confiança</div>
+        </article>
+
+        <article class="review-card fade">
+          <div class="review-top">
+            <div class="review-user">
+              <div class="review-avatar">A</div>
+              <div>
+                <strong>Alexandre Vidal</strong>
+                <span>Local Guide·38 avaliações·1 foto</span>
+              </div>
+            </div>
+            <div class="stars">★★★★★</div>
+          </div>
+
+          <p class="review-text">
+            Ótima qualidade, entregam em casa.
+          </p>
+
+          <div class="review-badge">✔ Atendimento elogiado</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="cardapio" class="fade">
+    <h2>Cardápio</h2>
+    <p class="p-center">Veja todos os itens e opções disponíveis no nosso cardápio.</p>
+    <div class="center-actions">
+      <a class="btn orange" href="Cardapio.html">Ver Cardápio</a>
+    </div>
+  </section>
+
+  <section id="redes" class="fade">
+    <h2>Redes Sociais</h2>
+    <p class="p-center">
+      Receitas, novidades e bastidores. Veja alguns vídeos (reels) do nosso Instagram:
+    </p>
+
+    <div class="reels-grid">
+      <div class="reel">
+        <div class="badge">@thaisbaiadonascimento</div>
+        <video src="Fácil_macarrao.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      </div>
+      <div class="reel">
+        <div class="badge">@silvio_andrade_</div>
+        <video src="Risotto_Salmão.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      </div>
+      <div class="reel">
+        <div class="badge">Dica @slimfishpescado</div>
+        <video src="Refeição.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      </div>
+      <div class="reel">
+        <div class="badge">@silvio_andrade_</div>
+        <video src="Temaki.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      </div>
+    </div>
+
+    <div class="center-actions">
+      <a class="btn primary" href="https://instagram.com/slimfishpescado" target="_blank" rel="noopener">
+        Ir para o Instagram
+      </a>
+    </div>
+  </section>
+
+  <section id="sobre" class="fade">
+    <h2>Sobre Nós</h2>
+    <p class="p-center">
+      Somos uma empresa familiar especializada no comércio e distribuição de pescados frescos de alta qualidade.
+      Nossas atividades foram iniciadas pelo Sr. Hajime Namba no início dos anos 90, trazendo experiência, tradição
+      e compromisso com a procedência e o frescor.
+    </p>
+
+    <div class="split" style="margin-top:28px;">
+      <div class="card">
+        <h3 style="color:var(--primary); margin-bottom:10px;">Tradição & Confiança</h3>
+        <p style="line-height:1.75; opacity:.95;">
+          Atendemos com responsabilidade e cuidado desde a seleção até a entrega. Nosso foco é qualidade e assertividade
+          em cada pedido.
+        </p>
+
+        <div style="margin-top:18px;">
+          <a class="btn orange" href="Sobrenos.html">Saiba Mais</a>
+        </div>
+      </div>
+
+      <div class="split-img">
+        <img src="sobre1.jpg" alt="Slim Fish">
+      </div>
+    </div>
+  </section>
+
+  <section id="contato" class="fade">
+    <h2>Contate-nos</h2>
+    <p class="p-center">Faça seu pedido e tire dúvidas. Responderemos o mais rápido possível.</p>
+
+    <div class="split" style="margin-top:28px;">
+      <div class="split-img">
+        <img src="imagemINSTAGRAM.jpg" alt="Contato Slim Fish">
+      </div>
+
+      <div class="card">
+        <h3 style="color:var(--primary); margin-bottom:10px;">Atendimento</h3>
+
+        <div class="contact-list">
+          <div>📞 Telefone: <a href="tel:+5511997308201">(11) 99730-8201</a></div>
+          <div>📩 Instagram: <a href="https://instagram.com/slimfishpescado" target="_blank" rel="noopener">@slimfishpescado</a></div>
+          <div>🟣 Empresa: <strong>Slim Fish</strong></div>
+        </div>
+
+        <div style="margin-top:18px;">
+          <a class="btn primary" href="https://wa.me/5511997308201" target="_blank" rel="noopener">
+            Fazer pedido no WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="float-stack dim" id="floatStack">
+    <a href="Empresas.html" class="floating-btn biz" rel="noopener">
+      <span class="icon"><img src="empresaicon.png" alt=""></span>
+      Para empresas
+    </a>
+
+    <a href="https://wa.me/5511997308201" class="floating-btn whats" target="_blank" rel="noopener">
+      <span class="icon"><img src="whatsapp.avif" alt=""></span>
+      Fazer pedido
+    </a>
+  </div>
+
+  <footer>
+    <div class="footer-wrap">
+      <div class="footer-brand">
+        <img src="logo.jpg" alt="Slim Fish">
+        <div>
+          <strong>Slim Fish</strong><br>
+          <span style="opacity:.85; font-size:13px;">Pescados frescos de alta qualidade</span>
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <strong style="opacity:.95;">Contato</strong>
+        <a href="tel:+5511997308201">Telefone: (11) 99730-8201</a>
+        <a href="Pedido.html" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+
+      <div class="footer-links">
+        <strong style="opacity:.95;">Redes</strong>
+        <a href="https://instagram.com/slimfishpescado" target="_blank" rel="noopener">Instagram</a>
+        <a href="#inicio">Voltar ao topo</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom" style="max-width:1200px; margin:16px auto 0;">
+      Feito por <strong>Slim Fish</strong> • Todos os direitos reservados • © <strong>2026</strong>
+    </div>
+  </footer>
+
+  <!-- MODAL BANDEJA -->
+  <div class="tray-modal" id="trayModal" aria-hidden="true">
+    <div class="tray-modal-backdrop" id="trayModalBackdrop"></div>
+
+    <div class="tray-modal-card" role="dialog" aria-modal="true" aria-labelledby="trayModalTitle">
+      <div class="tray-modal-photo">
+        <img id="trayModalImage" src="IMG-Peixes/img2.jpeg" alt="">
+        <div class="tray-modal-badge">Bandeja em destaque</div>
+        <button class="tray-modal-close" id="trayModalClose" aria-label="Fechar">✕</button>
+      </div>
+
+      <div class="tray-modal-body">
+        <h3 id="trayModalTitle">Tilápia em filé</h3>
+        <p id="trayModalText">
+          Veja essa opção no cardápio ou siga para a simulação do pedido com esta bandeja já destacada.
+        </p>
+
+        <div class="tray-modal-actions">
+          <a class="btn orange" id="trayModalCardapioBtn" href="Cardapio.html">Ir para o cardápio</a>
+          <a class="btn primary" id="trayModalPedidoBtn" href="Pedido.html">Simular pedido</a>
+        </div>
+
+        <div class="tray-modal-hint">
+          Toque fora do popup para fechar. Ele também fecha sozinho após 30 segundos sem interação.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  function toggleMenu(){
+    document.getElementById('sideMenu').classList.toggle('active');
+  }
+
+  /* HERO SLIDER */
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+  const intervalMs = 1800;
+
+  setInterval(() => {
+    slides[current].classList.remove('active');
+    current = (current + 1) % slides.length;
+    slides[current].classList.add('active');
+  }, intervalMs);
+
+  /* FADE */
+  const fades = document.querySelectorAll('.fade');
+  const heroTop = document.getElementById("heroTop");
+
+  function reveal(){
+    fades.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if(rect.top < window.innerHeight - 60){
+        el.classList.add('show');
+      }
+    });
+  }
+
+  function forceHeroShow(){
+    if(heroTop) heroTop.classList.add("show");
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    forceHeroShow();
+    reveal();
+    setTimeout(reveal, 60);
+    setTimeout(reveal, 240);
+  });
+
+  window.addEventListener('load', () => {
+    forceHeroShow();
+    reveal();
+    setTimeout(reveal, 80);
+    setTimeout(reveal, 260);
+  });
+
+  window.addEventListener('scroll', reveal, { passive:true });
+  window.addEventListener('resize', reveal);
+
+  /* BANDEJA */
+  const trayMarquee = document.getElementById('trayMarquee');
+  const trayTrack = document.getElementById('trayTrack');
+  const trayItems = [...trayTrack.querySelectorAll('.tray-item')];
+
+  let autoRaf = null;
+  let isAuto = true;
+  let isDragging = false;
+  let startX = 0;
+  let startTranslate = 0;
+  let translateX = 0;
+
+  const speedPxPerFrame = 0.55;
+  const resumeAfterIdleMs = 5000;
+  let idleTimer = null;
+
+  function setTranslate(x){
+    translateX = x;
+    const trackWidth = trayTrack.scrollWidth;
+    const half = trackWidth / 2;
+
+    if(translateX <= -half) translateX += half;
+    if(translateX > 0) translateX -= half;
+
+    trayTrack.style.transform = `translateX(${translateX}px)`;
+  }
+
+  function autoLoop(){
+    if(!isAuto) return;
+    setTranslate(translateX - speedPxPerFrame);
+    autoRaf = requestAnimationFrame(autoLoop);
+  }
+
+  function startAuto(){
+    if(isAuto) return;
+    isAuto = true;
+    autoRaf = requestAnimationFrame(autoLoop);
+  }
+
+  function stopAuto(){
+    isAuto = false;
+    if(autoRaf) cancelAnimationFrame(autoRaf);
+    autoRaf = null;
+  }
+
+  function clearSelection(){
+    trayItems.forEach(it => it.classList.remove('selected'));
+  }
+
+  function pointerDown(clientX){
+    isDragging = true;
+    stopAuto();
+    clearSelection();
+
+    startX = clientX;
+    startTranslate = translateX;
+
+    if(idleTimer) clearTimeout(idleTimer);
+  }
+
+  function pointerMove(clientX){
+    if(!isDragging) return;
+    const dx = clientX - startX;
+    setTranslate(startTranslate + dx);
+  }
+
+  function pointerUp(){
+    if(!isDragging) return;
+    isDragging = false;
+
+    if(idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      if(!trayModal.classList.contains("open")) startAuto();
+    }, resumeAfterIdleMs);
+  }
+
+  trayMarquee.addEventListener('mousedown', (e) => pointerDown(e.clientX));
+  window.addEventListener('mousemove', (e) => pointerMove(e.clientX));
+  window.addEventListener('mouseup', pointerUp);
+
+  trayMarquee.addEventListener('touchstart', (e) => pointerDown(e.touches[0].clientX), { passive:true });
+  trayMarquee.addEventListener('touchmove', (e) => pointerMove(e.touches[0].clientX), { passive:true });
+  trayMarquee.addEventListener('touchend', pointerUp, { passive:true });
+
+  requestAnimationFrame(autoLoop);
+
+  /* MODAL BANDEJA */
+  const trayModal = document.getElementById("trayModal");
+  const trayModalBackdrop = document.getElementById("trayModalBackdrop");
+  const trayModalClose = document.getElementById("trayModalClose");
+  const trayModalImage = document.getElementById("trayModalImage");
+  const trayModalTitle = document.getElementById("trayModalTitle");
+  const trayModalText = document.getElementById("trayModalText");
+  const trayModalPedidoBtn = document.getElementById("trayModalPedidoBtn");
+
+  let modalAutoCloseTimer = null;
+  let currentTrayData = null;
+
+  function resetModalTimer(){
+    clearTimeout(modalAutoCloseTimer);
+    modalAutoCloseTimer = setTimeout(() => {
+      closeTrayModal();
+    }, 30000);
+  }
+
+  function openTrayModal(item){
+    const title = item.dataset.title || "Bandeja";
+    const image = item.dataset.image || item.querySelector("img")?.getAttribute("src") || "";
+
+    currentTrayData = { title, image };
+
+    clearSelection();
+    item.classList.add("selected");
+
+    trayModalTitle.textContent = title;
+    trayModalImage.src = image;
+    trayModalImage.alt = title;
+    trayModalText.textContent = `Você pode ver “${title}” no cardápio ou seguir para a simulação com esta bandeja já destacada.`;
+
+    const pedidoUrl = `Pedido.html?item=${encodeURIComponent(title)}&img=${encodeURIComponent(image)}`;
+    trayModalPedidoBtn.href = pedidoUrl;
+
+    trayModal.classList.add("open");
+    trayModal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+    stopAuto();
+    resetModalTimer();
+  }
+
+  function closeTrayModal(){
+    trayModal.classList.remove("open");
+    trayModal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+    clearTimeout(modalAutoCloseTimer);
+    clearSelection();
+    startAuto();
+  }
+
+  trayItems.forEach(item => {
+    item.addEventListener('click', () => {
+      if(isDragging) return;
+      openTrayModal(item);
+    });
+  });
+
+  trayModalBackdrop.addEventListener("click", closeTrayModal);
+  trayModalClose.addEventListener("click", closeTrayModal);
+
+  trayModal.addEventListener("mousemove", resetModalTimer);
+  trayModal.addEventListener("touchstart", resetModalTimer, { passive:true });
+  trayModal.addEventListener("click", resetModalTimer);
+  trayModal.addEventListener("keydown", resetModalTimer);
+
+  window.addEventListener("keydown", (e) => {
+    if(e.key === "Escape" && trayModal.classList.contains("open")){
+      closeTrayModal();
+    }
+  });
+
+  /* VIDEOS */
+  window.addEventListener("load", () => {
+    document.querySelectorAll("video").forEach(v => {
+      v.muted = true;
+      v.playsInline = true;
+      const p = v.play();
+      if(p) p.catch(()=>{});
+    });
+  });
+
+  /* NAV ATIVO */
+  const navLinks = document.querySelectorAll('nav .links a');
+  const indicator = document.getElementById('sectionIndicator');
+
+  const sectionsMap = [
+    { id: "inicio",     label: "Início" },
+    { id: "bandeja",    label: "Produtos" },
+    { id: "avaliacoes", label: "Avaliações" },
+    { id: "cardapio",   label: "Cardápio" },
+    { id: "sobre",      label: "Sobre Nós" },
+    { id: "redes",      label: "Redes" },
+    { id: "contato",    label: "Contato" }
+  ];
+
+  let indicatorTimer = null;
+
+  function setActiveNav(id){
+    navLinks.forEach(a => {
+      const href = a.getAttribute("href") || "";
+      a.classList.toggle("active", href === `#${id}`);
+    });
+  }
+
+  function showIndicator(text){
+    if(!indicator) return;
+    indicator.textContent = text;
+    indicator.classList.add("show");
+    clearTimeout(indicatorTimer);
+    indicatorTimer = setTimeout(() => {
+      indicator.classList.remove("show");
+    }, 1200);
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    const visible = entries
+      .filter(e => e.isIntersecting)
+      .sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+    if(!visible) return;
+    const id = visible.target.id;
+    const found = sectionsMap.find(s => s.id === id);
+    if(!found) return;
+
+    setActiveNav(id);
+    showIndicator(found.label);
+  }, {
+    root:null,
+    threshold:[0.25, 0.35, 0.5, 0.65]
+  });
+
+  sectionsMap.forEach(s => {
+    const el = document.getElementById(s.id);
+    if(el) observer.observe(el);
+  });
+
+  setActiveNav("inicio");
+
+  /* FLOAT BUTTONS */
+  const floatStack = document.getElementById("floatStack");
+
+  function updateFloatStack(){
+    if(!floatStack) return;
+    const y = window.scrollY || document.documentElement.scrollTop || 0;
+    if(y < 120) floatStack.classList.add("dim");
+    else floatStack.classList.remove("dim");
+  }
+
+  window.addEventListener("scroll", updateFloatStack, { passive:true });
+  window.addEventListener("load", updateFloatStack);
+  document.addEventListener("DOMContentLoaded", updateFloatStack);
+
+  /* CTA TREMIDINHA */
+  const cta = document.getElementById("ctaFazerPedido");
+
+  function vibrateCTA(){
+    if(!cta) return;
+    cta.classList.remove("vibrate");
+    void cta.offsetWidth;
+    cta.classList.add("vibrate");
+    setTimeout(() => cta.classList.remove("vibrate"), 460);
+  }
+
+  if(cta){
+    setInterval(vibrateCTA, 1200);
+  }
+  </script>
+
+</body>
+</html>

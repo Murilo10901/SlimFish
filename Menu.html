@@ -1,0 +1,2880 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <link rel="icon" type="image/png" href="logo.jpg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prévia do Pedido | Slim Fish</title>
+
+  <style>
+    :root{
+      --primary:#4b0082;
+      --primary-dark:#2a003d;
+      --accent:#9d4edd;
+      --brand-orange:#E06020;
+      --brand-orange-dark:#C94F17;
+
+      --bg:#0b0711;
+      --panel:rgba(255,255,255,.08);
+      --panel-strong:rgba(255,255,255,.12);
+      --stroke:rgba(255,255,255,.10);
+      --text:#ffffff;
+      --muted:#c5bdd6;
+      --ok:#17b26a;
+      --warn:#ffb020;
+      --danger:#ff5d5d;
+      --shadow:0 24px 60px rgba(0,0,0,.45);
+      --soft-shadow:0 18px 44px rgba(0,0,0,.28);
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:"Segoe UI", Arial, sans-serif;
+    }
+
+    html{ scroll-behavior:smooth; }
+
+    body{
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(157,78,221,.22), transparent 60%),
+        radial-gradient(1200px 600px at 90% 20%, rgba(224,96,32,.18), transparent 60%),
+        radial-gradient(900px 900px at 50% 100%, rgba(75,0,130,.18), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      overflow-x:hidden;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:80;
+      backdrop-filter:blur(14px);
+      background:rgba(10,6,18,.78);
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+
+    .topbar-inner{
+      max-width:1280px;
+      margin:auto;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .brand img{
+      width:44px;
+      height:44px;
+      border-radius:50%;
+      object-fit:cover;
+      background:#fff;
+      padding:2px;
+      flex:0 0 auto;
+      box-shadow:0 10px 24px rgba(0,0,0,.30);
+    }
+
+    .brand strong{
+      display:block;
+      font-size:17px;
+      letter-spacing:.2px;
+      font-weight:1000;
+    }
+
+    .brand small{
+      display:block;
+      color:var(--muted);
+      margin-top:2px;
+      font-size:12px;
+      line-height:1.35;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .container{
+      max-width:1280px;
+      margin:auto;
+      padding:16px;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:12px 16px;
+      border-radius:999px;
+      text-decoration:none;
+      font-weight:1000;
+      border:1px solid rgba(255,255,255,.10);
+      color:#fff;
+      cursor:pointer;
+      user-select:none;
+      transition:transform .18s ease, filter .18s ease, box-shadow .18s ease, opacity .18s ease;
+      background:transparent;
+    }
+
+    .btn:hover{ transform:translateY(-2px); }
+    .btn:active{ transform:translateY(0) scale(.98); filter:brightness(.96); }
+
+    .btn.orange{
+      background:linear-gradient(135deg, var(--brand-orange), var(--brand-orange-dark));
+      box-shadow:0 16px 40px rgba(224,96,32,.20);
+    }
+
+    .btn.purple{
+      background:linear-gradient(135deg, var(--primary), var(--accent));
+      box-shadow:0 16px 40px rgba(157,78,221,.18);
+    }
+
+    .btn.ghost{
+      background:transparent;
+      box-shadow:none;
+    }
+
+    .btn.green{
+      background:linear-gradient(135deg, #119c5f, #17b26a);
+      box-shadow:0 16px 40px rgba(23,178,106,.20);
+    }
+
+    .mini-note{
+      position:fixed;
+      left:50%;
+      bottom:86px;
+      transform:translateX(-50%);
+      z-index:95;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(12,12,20,.86);
+      border:1px solid rgba(255,255,255,.10);
+      color:#fff;
+      font-size:13px;
+      font-weight:900;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      backdrop-filter:blur(10px);
+      box-shadow:0 14px 34px rgba(0,0,0,.26);
+    }
+
+    .mini-note .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:linear-gradient(135deg, var(--brand-orange), var(--accent));
+      box-shadow:0 0 0 6px rgba(255,255,255,.04);
+      flex:0 0 auto;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:28px;
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:var(--shadow);
+      min-height:320px;
+      background:
+        linear-gradient(rgba(0,0,0,.58), rgba(0,0,0,.34)),
+        url('IMG-Peixes/img18.jpeg') center/cover no-repeat;
+    }
+
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:-30%;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(157,78,221,.28), transparent 26%),
+        radial-gradient(circle at 80% 70%, rgba(224,96,32,.22), transparent 24%);
+      animation:heroGlow 8s linear infinite alternate;
+      pointer-events:none;
+    }
+
+    @keyframes heroGlow{
+      from{ transform:scale(1) translateY(0); }
+      to{ transform:scale(1.08) translateY(-8px); }
+    }
+
+    .hero-content{
+      position:relative;
+      z-index:2;
+      padding:28px 20px;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-end;
+      min-height:320px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      width:max-content;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      font-size:12px;
+      font-weight:1000;
+      letter-spacing:.5px;
+      text-transform:uppercase;
+      box-shadow:0 10px 24px rgba(0,0,0,.18);
+    }
+
+    .hero h1{
+      margin-top:16px;
+      font-size:clamp(30px, 5vw, 52px);
+      line-height:1.02;
+      letter-spacing:-.8px;
+      max-width:920px;
+    }
+
+    .hero p{
+      margin-top:12px;
+      font-size:15px;
+      line-height:1.7;
+      color:var(--muted);
+      max-width:840px;
+    }
+
+    .hero-cta{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:18px;
+      margin-top:18px;
+    }
+
+    .panel{
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .panel.pad{
+      padding:18px;
+    }
+
+    .panel h2{
+      font-size:24px;
+      line-height:1.1;
+      margin-bottom:8px;
+      letter-spacing:-.4px;
+    }
+
+    .panel p{
+      color:var(--muted);
+      line-height:1.65;
+      font-size:14px;
+    }
+
+    .rules-bar{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+
+    .rules-item{
+      border-radius:18px;
+      padding:16px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      transition:transform .18s ease, border-color .18s ease;
+    }
+
+    .rules-item:hover{
+      transform:translateY(-2px);
+      border-color:rgba(255,255,255,.16);
+    }
+
+    .rules-item strong{
+      display:block;
+      font-size:16px;
+      margin-bottom:5px;
+    }
+
+    .rules-item p{
+      font-size:13px;
+      line-height:1.55;
+      color:var(--muted);
+    }
+
+    .conditions-card{
+      margin-top:18px;
+      border-radius:20px;
+      padding:18px;
+      background:linear-gradient(135deg, rgba(75,0,130,.20), rgba(224,96,32,.12));
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 18px 46px rgba(0,0,0,.22);
+    }
+
+    .conditions-card strong{
+      display:block;
+      font-size:18px;
+      margin-bottom:6px;
+    }
+
+    .conditions-card p{
+      color:var(--muted);
+      line-height:1.65;
+      font-size:14px;
+    }
+
+    .section-title{
+      margin-top:18px;
+      font-size:26px;
+      font-weight:1000;
+      letter-spacing:-.3px;
+    }
+
+    .section-sub{
+      margin-top:6px;
+      color:var(--muted);
+      line-height:1.65;
+      font-size:14px;
+      max-width:820px;
+    }
+
+    .tools{
+      margin-top:18px;
+      display:grid;
+      gap:12px;
+    }
+
+    .search{
+      display:flex;
+      gap:10px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.08);
+      padding:12px 14px;
+      box-shadow:var(--soft-shadow);
+    }
+
+    .search input{
+      width:100%;
+      border:none;
+      outline:none;
+      background:transparent;
+      color:#fff;
+      font-size:15px;
+      font-weight:800;
+    }
+
+    .search input::placeholder{
+      color:rgba(255,255,255,.58);
+    }
+
+    .tabs{
+      display:flex;
+      gap:10px;
+      overflow:auto;
+      padding-bottom:4px;
+      scrollbar-width:none;
+    }
+
+    .tabs::-webkit-scrollbar{ display:none; }
+
+    .tab{
+      flex:0 0 auto;
+      padding:11px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      color:#fff;
+      font-weight:1000;
+      cursor:pointer;
+      white-space:nowrap;
+      transition:.18s;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      box-shadow:0 10px 24px rgba(0,0,0,.16);
+    }
+
+    .tab .tab-emoji{
+      font-size:15px;
+    }
+
+    .tab.active{
+      background:linear-gradient(135deg, rgba(75,0,130,.92), rgba(157,78,221,.80));
+      box-shadow:0 12px 30px rgba(0,0,0,.24);
+      border-color:rgba(255,255,255,.18);
+    }
+
+    .menu-grid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+    }
+
+    .item{
+      border-radius:24px;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:0 18px 46px rgba(0,0,0,.28);
+      display:grid;
+      grid-template-columns:120px 1fr;
+      min-height:185px;
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      scroll-margin-top:110px;
+      position:relative;
+    }
+
+    .item::before{
+      content:"";
+      position:absolute;
+      inset:auto 0 0 0;
+      height:1px;
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+      opacity:.6;
+      pointer-events:none;
+    }
+
+    .item:hover{
+      transform:translateY(-4px);
+      box-shadow:0 22px 50px rgba(0,0,0,.34);
+      border-color:rgba(255,255,255,.16);
+    }
+
+    .item.highlight{
+      border-color:rgba(224,96,32,.86);
+      box-shadow:0 0 0 2px rgba(224,96,32,.16), 0 22px 50px rgba(0,0,0,.36);
+      animation:highlightPulse 1.4s ease 2;
+    }
+
+    @keyframes highlightPulse{
+      0%{ transform:scale(1); }
+      50%{ transform:scale(1.01); }
+      100%{ transform:scale(1); }
+    }
+
+    .item-img{
+      position:relative;
+      background:#0e0c14;
+      overflow:hidden;
+    }
+
+    .item-img img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      transition:transform .35s ease, filter .35s ease;
+    }
+
+    .item-media-trigger{
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .item:hover .item-img img{
+      transform:scale(1.06);
+      filter:saturate(1.05);
+    }
+
+    .item-media-trigger::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg, transparent 40%, rgba(0,0,0,.35));
+      pointer-events:none;
+    }
+
+    .item-photo-btn{
+      position:absolute;
+      left:8px;
+      right:8px;
+      bottom:8px;
+      z-index:2;
+      display:flex;
+      justify-content:center;
+    }
+
+    .photo-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(0,0,0,.60);
+      border:1px solid rgba(255,255,255,.14);
+      color:#fff;
+      font-size:11px;
+      font-weight:1000;
+      backdrop-filter:blur(7px);
+    }
+
+    .item-body{
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .item-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+    }
+
+    .item-title{
+      font-size:18px;
+      line-height:1.08;
+      font-weight:1000;
+      letter-spacing:.1px;
+    }
+
+    .item-title.clickable{
+      cursor:pointer;
+      transition:opacity .18s ease, transform .18s ease;
+    }
+
+    .item-title.clickable:hover{
+      opacity:.90;
+      transform:translateX(1px);
+    }
+
+    .item-code{
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      font-size:11px;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+
+    .item-desc{
+      color:var(--muted);
+      line-height:1.55;
+      font-size:13px;
+    }
+
+    .item-meta{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .pill{
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      font-size:12px;
+      font-weight:900;
+    }
+
+    .item-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .picker{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:14px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+    }
+
+    .picker label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:900;
+    }
+
+    .picker select{
+      border:none;
+      outline:none;
+      background:transparent;
+      color:#fff;
+      font-weight:1000;
+      cursor:pointer;
+      font-size:13px;
+    }
+
+    .picker select option,
+    .select option{
+      background:#1a1226;
+      color:#fff;
+    }
+
+    .price{
+      font-size:17px;
+      font-weight:1000;
+      white-space:nowrap;
+      padding:8px 10px;
+      border-radius:12px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .add-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:linear-gradient(135deg, var(--brand-orange), var(--brand-orange-dark));
+      color:#fff;
+      font-weight:1000;
+      cursor:pointer;
+      transition:transform .18s ease, filter .18s ease, box-shadow .18s ease;
+      box-shadow:0 14px 30px rgba(224,96,32,.18);
+    }
+
+    .add-btn:hover{ transform:translateY(-2px); }
+    .add-btn:active{ transform:translateY(0) scale(.98); filter:brightness(.95); }
+
+    .item-note-inline{
+      width:100%;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      padding:10px 12px;
+      outline:none;
+      resize:none;
+      min-height:56px;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .item-note-inline::placeholder{
+      color:rgba(255,255,255,.56);
+    }
+
+    .item-bottom-actions{
+      display:grid;
+      gap:8px;
+      width:100%;
+    }
+
+    .bag{
+      position:fixed;
+      right:14px;
+      bottom:14px;
+      z-index:90;
+    }
+
+    .bag-btn{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px 10px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 18px 44px rgba(0,0,0,.45);
+      background:linear-gradient(135deg, var(--primary), var(--accent));
+      color:#fff;
+      font-weight:1000;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .bag-btn .ic{
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      background:#fff;
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      font-weight:1000;
+    }
+
+    .bag-btn .count{
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.18);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+    }
+
+    .backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.55);
+      z-index:98;
+      opacity:0;
+      pointer-events:none;
+      transition:.22s ease;
+    }
+
+    .backdrop.open{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .drawer{
+      position:fixed;
+      right:0;
+      top:0;
+      height:100vh;
+      width:min(460px, 94vw);
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+      border-left:1px solid rgba(255,255,255,.10);
+      backdrop-filter:blur(16px);
+      z-index:99;
+      transform:translateX(110%);
+      transition:.24s ease;
+      box-shadow:-24px 0 60px rgba(0,0,0,.45);
+      display:flex;
+      flex-direction:column;
+    }
+
+    .drawer.open{ transform:translateX(0); }
+
+    .drawer-head{
+      padding:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+
+    .drawer-head strong{
+      font-weight:1000;
+      letter-spacing:.2px;
+    }
+
+    .close{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      color:#fff;
+      cursor:pointer;
+      user-select:none;
+      transition:transform .18s ease, background .18s ease;
+    }
+
+    .close:hover{
+      transform:scale(1.04);
+      background:rgba(255,255,255,.12);
+    }
+
+    .drawer-body{
+      padding:12px 14px;
+      overflow:auto;
+      flex:1;
+    }
+
+    .cart-empty{
+      padding:22px 0;
+      text-align:center;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    .cart-item{
+      padding:12px;
+      border-radius:16px;
+      background:rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.10);
+      display:grid;
+      gap:10px;
+      margin-bottom:10px;
+    }
+
+    .cart-top{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .cart-title{
+      font-weight:1000;
+      line-height:1.2;
+    }
+
+    .cart-meta{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+      line-height:1.45;
+    }
+
+    .qty{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .qbtn{
+      width:38px;
+      height:38px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      cursor:pointer;
+      color:#fff;
+      font-weight:1000;
+    }
+
+    .qty span{ font-weight:1000; }
+
+    .remove{
+      color:#fff;
+      opacity:.86;
+      text-decoration:underline;
+      cursor:pointer;
+      font-weight:900;
+      font-size:12px;
+    }
+
+    .notes{
+      display:grid;
+      gap:6px;
+    }
+
+    .notes label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:900;
+    }
+
+    .notes textarea{
+      width:100%;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      padding:10px 12px;
+      min-height:70px;
+      outline:none;
+      resize:none;
+      font-weight:700;
+    }
+
+    .drawer-foot{
+      padding:14px;
+      border-top:1px solid rgba(255,255,255,.10);
+      display:grid;
+      gap:10px;
+    }
+
+    .summary-line{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size:14px;
+      font-weight:1000;
+    }
+
+    .summary-line.muted{
+      font-weight:800;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .summary-line.total{
+      font-size:16px;
+    }
+
+    .footer-note{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:86px;
+      transform:translateX(-50%) translateY(20px);
+      background:rgba(23,178,106,.96);
+      color:#fff;
+      padding:12px 14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.18);
+      box-shadow:0 20px 50px rgba(0,0,0,.45);
+      opacity:0;
+      transition:.22s ease;
+      z-index:130;
+      font-weight:1000;
+    }
+
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+    }
+
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.62);
+      backdrop-filter:blur(8px);
+      z-index:140;
+      opacity:0;
+      pointer-events:none;
+      transition:.2s ease;
+    }
+
+    .modal-backdrop.open{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .checkout-modal{
+      position:fixed;
+      left:50%;
+      top:50%;
+      transform:translate(-50%, -50%) scale(.96);
+      width:min(760px, calc(100% - 20px));
+      max-height:90vh;
+      overflow:auto;
+      z-index:141;
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(22,16,34,.98), rgba(16,12,24,.98));
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 30px 80px rgba(0,0,0,.45);
+      opacity:0;
+      pointer-events:none;
+      transition:.22s ease;
+    }
+
+    .checkout-modal.open{
+      opacity:1;
+      pointer-events:auto;
+      transform:translate(-50%, -50%) scale(1);
+    }
+
+    .checkout-head{
+      padding:16px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      position:sticky;
+      top:0;
+      background:rgba(22,16,34,.98);
+      z-index:2;
+    }
+
+    .checkout-head strong{
+      font-size:18px;
+      font-weight:1000;
+    }
+
+    .checkout-body{
+      padding:16px;
+      display:grid;
+      gap:16px;
+    }
+
+    .checkout-box{
+      border-radius:18px;
+      padding:16px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
+    }
+
+    .checkout-box h3{
+      font-size:18px;
+      margin-bottom:6px;
+    }
+
+    .checkout-box p{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.55;
+    }
+
+    .field{
+      display:grid;
+      gap:6px;
+    }
+
+    .field label{
+      font-size:13px;
+      font-weight:900;
+      color:#fff;
+    }
+
+    .input, .textarea, .select{
+      width:100%;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      padding:12px 14px;
+      outline:none;
+      font-size:14px;
+      font-weight:800;
+    }
+
+    .textarea{
+      min-height:84px;
+      resize:vertical;
+    }
+
+    .input::placeholder,
+    .textarea::placeholder{
+      color:rgba(255,255,255,.58);
+    }
+
+    .form-row{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+
+    .checkout-result{
+      border-radius:18px;
+      padding:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.05);
+      display:none;
+    }
+
+    .checkout-result.show{ display:block; }
+    .checkout-result.ok{
+      background:rgba(23,178,106,.10);
+      border-color:rgba(23,178,106,.34);
+    }
+    .checkout-result.warn{
+      background:rgba(255,176,32,.10);
+      border-color:rgba(255,176,32,.28);
+    }
+    .checkout-result.danger{
+      background:rgba(255,93,93,.10);
+      border-color:rgba(255,93,93,.30);
+    }
+
+    .checkout-result strong{
+      display:block;
+      font-size:17px;
+      margin-bottom:6px;
+    }
+
+    .checkout-result p{
+      font-size:14px;
+      line-height:1.6;
+      color:#fff;
+    }
+
+    .checkout-tags{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+
+    .checkout-summary{
+      display:grid;
+      gap:10px;
+      margin-top:8px;
+    }
+
+    .checkout-summary-line{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size:14px;
+      font-weight:1000;
+    }
+
+    .checkout-summary-line.total{
+      font-size:16px;
+    }
+
+    .muted{
+      color:var(--muted);
+    }
+
+    .image-modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.76);
+      backdrop-filter:blur(10px);
+      z-index:170;
+      opacity:0;
+      pointer-events:none;
+      transition:.24s ease;
+    }
+
+    .image-modal-backdrop.open{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .image-modal{
+      position:fixed;
+      left:50%;
+      top:50%;
+      transform:translate(-50%, -50%) scale(.88);
+      width:min(860px, calc(100% - 24px));
+      max-height:88vh;
+      z-index:171;
+      opacity:0;
+      pointer-events:none;
+      transition:.26s ease;
+      display:grid;
+      gap:12px;
+      justify-items:center;
+    }
+
+    .image-modal.open{
+      opacity:1;
+      pointer-events:auto;
+      transform:translate(-50%, -50%) scale(1);
+    }
+
+    .image-modal-card{
+      width:100%;
+      border-radius:28px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(18,12,28,.98);
+      box-shadow:0 34px 90px rgba(0,0,0,.58);
+      position:relative;
+    }
+
+    .image-modal-card img{
+      width:100%;
+      max-height:76vh;
+      object-fit:contain;
+      display:block;
+      background:#0d0914;
+      animation:zoomSoft .28s ease;
+    }
+
+    @keyframes zoomSoft{
+      from{ transform:scale(.96); opacity:.7; }
+      to{ transform:scale(1); opacity:1; }
+    }
+
+    .image-modal-caption{
+      width:100%;
+      text-align:center;
+      color:#fff;
+      font-weight:1000;
+      font-size:16px;
+      padding:12px 16px 18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    }
+
+    .image-close{
+      position:absolute;
+      top:10px;
+      right:10px;
+      z-index:3;
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.42);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      font-size:18px;
+      font-weight:1000;
+      backdrop-filter:blur(6px);
+    }
+
+    @media (min-width:860px){
+      .layout{
+        grid-template-columns:1.08fr .92fr;
+      }
+
+      .menu-grid{
+        grid-template-columns:repeat(2, 1fr);
+      }
+
+      .form-row{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    @media (min-width:1180px){
+      .menu-grid{
+        grid-template-columns:repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width:767px){
+      .mini-note{
+        width:calc(100% - 22px);
+        text-align:center;
+        justify-content:center;
+      }
+
+      .hero{
+        min-height:280px;
+      }
+
+      .hero-content{
+        min-height:280px;
+        padding:22px 16px;
+      }
+
+      .item{
+        grid-template-columns:112px 1fr;
+        min-height:190px;
+        border-radius:22px;
+      }
+
+      .item-title{
+        font-size:16px;
+      }
+
+      .item-body{
+        padding:12px;
+        gap:9px;
+      }
+
+      .pill{
+        font-size:11px;
+        padding:6px 9px;
+      }
+
+      .price{
+        font-size:15px;
+      }
+
+      .photo-chip{
+        font-size:10px;
+        padding:6px 9px;
+      }
+
+      .bag{
+        right:10px;
+        bottom:10px;
+      }
+
+      .bag-btn{
+        box-shadow:0 16px 34px rgba(0,0,0,.42);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <img src="logo.jpg" alt="Slim Fish">
+        <div>
+          <strong>Slim Fish • Prévia do Pedido</strong>
+          <small>Monte sua prévia e valide o CEP só no final</small>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <a class="btn ghost" href="Pedido.html">↩ Voltar</a>
+        <a class="btn orange" href="https://wa.me/5511997308201?text=Ol%C3%A1!%20Quero%20falar%20com%20o%20atendimento%20da%20Slim%20Fish." target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="container">
+    <section class="hero">
+      <div class="hero-content">
+        <div class="eyebrow">Cardápio Interativo • Slim Fish</div>
+        <h1>Escolha os produtos, monte sua prévia e valide a entrega só no final</h1>
+        <p>
+          Você pode navegar livremente pelo cardápio, adicionar os itens que quiser e só no momento de finalizar informar o CEP para validar a entrega na sua região.
+        </p>
+        <div class="hero-cta">
+          <a class="btn purple" href="#menuSection">Ver cardápio</a>
+          <button class="btn orange" id="heroFinishBtn">Finalizar no WhatsApp</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="panel pad">
+        <h2>Regras do pedido</h2>
+        <p>
+          As regras ficam visíveis desde o começo para o cliente já saber como funciona antes de finalizar.
+        </p>
+
+        <div class="rules-bar">
+          <div class="rules-item">
+            <strong>Pedido mínimo</strong>
+            <p>Pedido mínimo de <strong>R$ 80,00</strong>.</p>
+          </div>
+
+          <div class="rules-item">
+            <strong>Frete</strong>
+            <p><strong>R$ 15,00</strong> de frete. <strong>Grátis a partir de R$ 200,00</strong>.</p>
+          </div>
+
+          <div class="rules-item">
+            <strong>Prazo</strong>
+            <p>Pedidos feitos até <strong>10:00</strong> podem sair no mesmo dia à tarde, conforme a rota da região. Após esse horário, segue para o próximo dia da rota.</p>
+          </div>
+
+          <div class="rules-item">
+            <strong>Pagamento e atendimento</strong>
+            <p>Pagamento combinado com o atendente. Entregas agendadas de <strong>segunda a sábado</strong>. Mesmo fora do horário, o cliente pode mandar mensagem para não perder o atendimento.</p>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel pad">
+        <h2>Condições especiais</h2>
+        <p>
+          O atendimento final confirma pesagem, disponibilidade, frete e entrega. A prévia é para facilitar o entendimento do pedido antes do fechamento final.
+        </p>
+
+        <div class="conditions-card">
+          <strong>Condomínios e observações</strong>
+          <p>
+            Condições especiais para condomínios podem ser consultadas no atendimento. O cliente também poderá informar referência, complemento e forma de pagamento na etapa final.
+          </p>
+        </div>
+      </aside>
+    </div>
+
+    <section id="menuSection">
+      <div class="section-title">Monte sua prévia no cardápio</div>
+      <div class="section-sub">
+        Navegue pelas categorias, veja os detalhes de cada item, escolha peso, quantidade e observações. Se você veio da página anterior com um item selecionado, ele será destacado automaticamente.
+      </div>
+
+      <div class="tools">
+        <div class="search">
+          <input id="searchInput" placeholder="Buscar no cardápio (ex: salmão, camarão, sashimi, empada...)">
+        </div>
+        <div class="tabs" id="tabs"></div>
+      </div>
+
+      <div class="section-title" id="categoryTitle" style="margin-top:18px;">Carregando...</div>
+      <div class="section-sub" id="categoryDesc">Veja os itens desta categoria.</div>
+
+      <div class="menu-grid" id="menuGrid"></div>
+      <div style="height:80px"></div>
+    </section>
+  </div>
+
+  <div class="bag">
+    <div class="bag-btn" id="openCartBtn">
+      <div class="ic">🛍️</div>
+      Sacolinha
+      <div class="count" id="bagCount">0</div>
+    </div>
+  </div>
+
+  <div class="backdrop" id="backdrop"></div>
+
+  <aside class="drawer" id="drawer" aria-label="Prévia do pedido">
+    <div class="drawer-head">
+      <strong>🛍️ Sua sacolinha (prévia)</strong>
+      <div class="close" id="closeCartBtn">✕</div>
+    </div>
+
+    <div class="drawer-body" id="cartBody"></div>
+
+    <div class="drawer-foot">
+      <div class="summary-line muted">
+        <span>Subtotal</span>
+        <span id="subtotalLine">R$ 0,00</span>
+      </div>
+
+      <div class="summary-line muted">
+        <span>Frete</span>
+        <span id="shippingLine">R$ 15,00</span>
+      </div>
+
+      <div class="summary-line total">
+        <span>Total aproximado</span>
+        <span id="totalLine">R$ 0,00</span>
+      </div>
+
+      <button class="btn orange" id="checkoutBtn" style="width:100%;">Finalizar no WhatsApp</button>
+
+      <div class="footer-note">
+        O valor final pode ser ajustado após pesagem, contagem e confirmação do frete.
+      </div>
+    </div>
+  </aside>
+
+  <div class="modal-backdrop" id="modalBackdrop"></div>
+
+  <div class="checkout-modal" id="checkoutModal">
+    <div class="checkout-head">
+      <strong>Finalizar prévia do pedido</strong>
+      <div class="close" id="closeModalBtn">✕</div>
+    </div>
+
+    <div class="checkout-body">
+      <div class="checkout-box">
+        <h3>1. Valide seu CEP</h3>
+        <p>
+          Antes de enviar a prévia no WhatsApp, valide o CEP para saber se a região está dentro da rota de entrega.
+        </p>
+
+        <div class="form-row" style="margin-top:14px;">
+          <div class="field">
+            <label for="customerCep">CEP</label>
+            <input class="input" id="customerCep" placeholder="Ex: 09050-000" maxlength="9">
+          </div>
+
+          <div class="field" style="align-content:end;">
+            <label>&nbsp;</label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn purple" id="validateCepBtn">Validar CEP</button>
+              <button class="btn ghost" id="changeCepBtn">Trocar CEP</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="checkout-result" id="cepResult"></div>
+      </div>
+
+      <div class="checkout-box">
+        <h3>2. Complete seus dados</h3>
+        <p>
+          Depois da validação, a rua, bairro e cidade serão preenchidos automaticamente. Você só complementa o que faltar.
+        </p>
+
+        <div class="form-row" style="margin-top:14px;">
+          <div class="field">
+            <label for="customerName">Seu nome</label>
+            <input class="input" id="customerName" placeholder="Ex: Rogério Lopes">
+          </div>
+
+          <div class="field">
+            <label for="paymentMethod">Forma de pagamento desejada</label>
+            <select class="select" id="paymentMethod">
+              <option value="">Selecione</option>
+              <option value="Pix">Pix</option>
+              <option value="Transferência bancária">Transferência bancária</option>
+              <option value="Cartão de débito à vista">Cartão de débito à vista</option>
+              <option value="Cartão de crédito à vista">Cartão de crédito à vista</option>
+              <option value="Dinheiro">Dinheiro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top:12px;">
+          <div class="field">
+            <label for="customerStreet">Rua / Avenida</label>
+            <input class="input" id="customerStreet" placeholder="Preenchido pelo CEP">
+          </div>
+
+          <div class="field">
+            <label for="customerNumber">Número</label>
+            <input class="input" id="customerNumber" placeholder="Ex: 123">
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top:12px;">
+          <div class="field">
+            <label for="customerDistrict">Bairro</label>
+            <input class="input" id="customerDistrict" placeholder="Preenchido pelo CEP">
+          </div>
+
+          <div class="field">
+            <label for="customerCity">Cidade / UF</label>
+            <input class="input" id="customerCity" placeholder="Preenchido pelo CEP">
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:12px;">
+          <label for="customerComplement">Referência / complemento</label>
+          <input class="input" id="customerComplement" placeholder="Ex: apto 21, bloco B, referência...">
+        </div>
+
+        <div class="field" style="margin-top:12px;">
+          <label for="customerObs">Observação geral (opcional)</label>
+          <textarea class="textarea" id="customerObs" placeholder="Ex: entregar no período da tarde, tocar interfone, etc."></textarea>
+        </div>
+      </div>
+
+      <div class="checkout-box">
+        <h3>3. Resumo da prévia</h3>
+        <p class="muted">
+          O WhatsApp vai receber os dados do cliente, o CEP, o endereço, a forma de pagamento desejada, os itens da prévia e o valor aproximado.
+        </p>
+
+        <div class="checkout-summary">
+          <div class="checkout-summary-line">
+            <span>Subtotal</span>
+            <span id="modalSubtotal">R$ 0,00</span>
+          </div>
+          <div class="checkout-summary-line">
+            <span>Frete</span>
+            <span id="modalShipping">R$ 15,00</span>
+          </div>
+          <div class="checkout-summary-line total">
+            <span>Total aproximado</span>
+            <span id="modalTotal">R$ 0,00</span>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+          <button class="btn orange" id="sendWhatsBtn">Enviar prévia no WhatsApp</button>
+          <button class="btn ghost" id="continueAnywayBtn" style="display:none;">Continuar mesmo assim</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal da foto -->
+  <div class="image-modal-backdrop" id="imageModalBackdrop"></div>
+  <div class="image-modal" id="imageModal">
+    <div class="image-modal-card">
+      <button class="image-close" id="imageCloseBtn">✕</button>
+      <img id="imageModalImg" src="" alt="">
+      <div class="image-modal-caption" id="imageModalCaption"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">✅ Prévia montada! Vamos abrir o WhatsApp...</div>
+
+  <script>
+    const WHATS = "5511997308201";
+    const MIN_ORDER = 80;
+    const SHIPPING = 15;
+    const FREE_SHIPPING_FROM = 200;
+
+    const CATEGORY_ICONS = {
+      "na-bandeja":"🧺",
+      "por-peso":"⚖️",
+      "praticidade":"✨",
+      "frutos-do-mar":"🦐",
+      "sashimi-bandeja":"🍣",
+      "sushi-bento":"🥢",
+      "aperitivos":"🔥"
+    };
+
+    const MENU = [
+      {
+        id:"na-bandeja",
+        title:"Na Bandeja",
+        desc:"Itens prontos em bandeja, com peso fechado ou opção por kg em alguns casos.",
+        items:[
+          { code:1, id:"salmao-premium-lombo", name:"Filé de Salmão Premium Lombo", desc:"Corte nobre na bandeja.", img:"IMG_BANDEJAS/Lombo de Salmão.jpeg", details:["400g", "Na bandeja"], variants:[{label:"400g", price:56.00}] },
+          { code:2, id:"salmao-premium-cauda", name:"Filé de Salmão Premium Cauda", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/salmao premium calda.jpeg", details:["400g", "Na bandeja"], variants:[{label:"400g", price:48.00}] },
+          { code:3, id:"tilapia-st-peter-bandeja", name:"Filé de Tilápia St. Peter", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/FILÉ TILAPIA ST PETER.jpeg", details:["400g", "Na bandeja"], variants:[{label:"400g", price:32.00}] },
+          { code:4, id:"pescada-branca-bandeja", name:"Filé de Pescada Branca", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/File de pescada fresca.jpeg", details:["400g", "Na bandeja"], variants:[{label:"400g", price:30.00}] },
+          { code:5, id:"sardinha-bandeja", name:"Filé de Sardinha", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/filé de sardinha.jpeg", details:["400g", "Na bandeja"], variants:[{label:"400g", price:18.00}] },
+          { code:6, id:"atum-posta-bandeja", name:"Filé de Atum Posta", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/File de ATUM posta.jpeg", details:["400g", "Na bandeja"], variants:[{label:"400g", price:50.00}] },
+          { code:10, id:"linguado-bandeja", name:"Filé de Linguado", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/FILÉ DE LINGUADO.jpeg", details:["400g","Na bandeja"], variants:[{label:"400g", price:38.00}] }
+        ]
+      },
+      {
+        id:"por-peso",
+        title:"Por Peso",
+        desc:"Itens com valores sujeitos à pesagem e cortes especiais conforme o produto.",
+        items:[
+          { code:6, id:"atum-posta", name:"Filé de Atum Posta", desc:"Venda por peso.", img:"IMG_BANDEJAS/File de ATUM posta.jpeg", details:["R$125/Kg"], variants:[{label:"1 Kg", price:125.00}] },
+          { code:7, id:"atum-tolete", name:"Filé de Atum Tolete", desc:"Venda por peso.", img:"IMG_BANDEJAS/File de ATUM TOLETE.jpeg", details:["R$155/Kg"], variants:[{label:"1 Kg", price:155.00}] },
+          { code:8, id:"salmao-sem-pele", name:"Filé de Salmão S/Pele", desc:"Venda por peso.", img:"IMG_BANDEJAS/Filé salmão sem pele.jpeg", details:["R$155/Kg"], variants:[{label:"1 Kg", price:155.00}] },
+          { code:9, id:"salmao-tolete", name:"Filé de Salmão Tolete", desc:"Venda por peso.", img:"IMG_BANDEJAS/Filé salmão Tolete.jpeg", details:["R$170/Kg"], variants:[{label:"1 Kg", price:170.00}] },
+          { code:10, id:"linguado", name:"Filé de Linguado", desc:"Venda por peso.", img:"IMG_BANDEJAS/FILÉ DE LINGUADO.jpeg", details:["R$95/Kg"], variants:[{label:"1 Kg", price:95.00}] },
+          { code:11, id:"salmao-banda-inteira", name:"Filé de Salmão Banda Inteira", desc:"Faixa de peso aproximada de 1,6kg a 1,8kg.", img:"IMG_BANDEJAS/file SALMAO BANDA INTEIRA.jpg", details:["1,6kg a 1,8kg", "R$130/Kg"], variants:[{label:"1 Kg", price:130.00}] },
+          { code:12, id:"anchova-inteira", name:"Anchova Inteira", desc:"Faixa de peso aproximada de 1kg a 3kg.", img:"IMG_BANDEJAS/Anchoeva inteira.jpg", details:["1kg a 3kg", "R$35/Kg", "Com ou sem pele", "Com ou sem osso", "Inteira e limpa", "Em posta ou filés"], variants:[{label:"1 Kg", price:35.00}] },
+          { code:13, id:"robalo-inteiro", name:"Robalo Inteiro", desc:"Faixa de peso aproximada de 3kg a 5kg.", img:"IMG-Peixes/Robalo Inteiro.jpg", details:["3kg a 5kg", "R$85/Kg", "Com ou sem pele", "Com ou sem osso", "Inteira e limpa", "Em posta ou filés"], variants:[{label:"1 Kg", price:85.00}] },
+          { code:14, id:"bacalhau-lombo", name:"Lombo de Bacalhau Gadus Macrocephalus", desc:"Congelado e dessalgado. A partir de 600g. Valores sujeitos à pesagem.", img:"IMG_BANDEJAS/LOMBO DE BACALHAU.jpg", details:["A partir de 600g", "R$173,75/Kg"], variants:[{label:"1 Kg", price:173.75}] }
+        ]
+      },
+      {
+        id:"praticidade",
+        title:"Praticidade",
+        desc:"Itens por unidade, em cubos, picados e opções prontas ou congeladas.",
+        items:[
+          { code:15, id:"hamburguer-tilapia", name:"Hambúrguer de Tilápia/St. Peter", desc:"Fresco 120g.", img:"IMG_BANDEJAS/Hamburger de tilápia.jpeg", details:["Até 3 unidades: R$ 8,50 cada", "A partir de 4 unidades: R$ 8,00 cada"], variants:[{label:"1 unidade", price:8.50}] },
+          { code:16, id:"hamburguer-salmao", name:"Hambúrguer de Salmão", desc:"Fresco 120g.", img:"IMG_BANDEJAS/Hamburger de salmão.jpeg", details:["Até 3 unidades: R$ 11,00 cada", "A partir de 4 unidades: R$ 10,50 cada"], variants:[{label:"1 unidade", price:11.00}] },
+          { code:17, id:"st-peter-cubos", name:"St. Peter em Cubos", desc:"Para ceviche ou poke.", img:"IMG_BANDEJAS/TILAPIA ST PETER EM CUBOS.jpg", details:["200g ou 500g"], variants:[{label:"200g", price:22.00}, {label:"500g", price:54.00}] },
+          { code:18, id:"salmao-cubos", name:"Salmão em Cubos", desc:"Para ceviche ou poke.", img:"IMG_BANDEJAS/salmao em cubos.jpg", details:["200g ou 500g"], variants:[{label:"200g", price:34.00}, {label:"500g", price:78.00}] },
+          { code:19, id:"atum-cubos", name:"Atum em Cubos", desc:"Para ceviche ou poke.", img:"IMG_BANDEJAS/atum em cubos.jpg", details:["200g ou 500g"], variants:[{label:"200g", price:32.00}, {label:"500g", price:76.00}] },
+          { code:20, id:"salmao-picado", name:"Salmão Picado", desc:"Para tartar.", img:"IMG_BANDEJAS/salmao picado.jpg", details:["200g ou 500g"], variants:[{label:"200g", price:34.00}, {label:"500g", price:78.00}] },
+          { code:21, id:"atum-picado", name:"Atum Picado", desc:"Para tartar.", img:"IMG_BANDEJAS/Atum Picado.jpeg", details:["200g ou 500g"], variants:[{label:"200g", price:32.00}, {label:"500g", price:76.00}] },
+          { code:22, id:"salmao-defumado", name:"Salmão Defumado", desc:"Produto pronto para consumo.", img:"IMG_BANDEJAS/salmao defumado.jpg", details:["100g"], variants:[{label:"100g", price:39.00}] },
+          { code:23, id:"carpaccio-salmao", name:"Carpaccio de Salmão", desc:"Opção prática e sofisticada.", img:"IMG_BANDEJAS/carpaccio de salmao.jpg", details:["400g"], variants:[{label:"400g", price:73.00}] },
+          { code:24, id:"tilapia-empanada", name:"Filé de Tilápia", desc:"Empanada e temperada congelada.", img:"IMG_BANDEJAS/tilapia empanada.jpg", details:["500g"], variants:[{label:"500g", price:48.00}] }
+        ]
+      },
+      {
+        id:"frutos-do-mar",
+        title:"Frutos do Mar",
+        desc:"Camarões, lula, polvo, alga, kani e mexilhão.",
+        items:[
+          { code:25, id:"camarao-cinza-medio-sc", name:"Camarão Cinza Médio", desc:"Sem cabeça.", img:"IMG-PEIXES/camarao cinza medio limpo.jpg", details:["200g ou 500g"], variants:[{label:"200g", price:24.00}, {label:"500g", price:58.00}] },
+          { code:26, id:"camarao-cinza-medio-limpo", name:"Camarão Cinza Médio Limpo", desc:"Opção limpa para facilitar o preparo.", img:"IMG-PEIXES/camarao cinza medio limpo.jpg", details:["200g ou 500g"], variants:[{label:"200g", price:29.00}, {label:"500g", price:70.00}] },
+          { code:27, id:"camarao-cinza-grande-sc", name:"Camarão Cinza Grande", desc:"Sem cabeça.", img:"IMG-PEIXES/Camarao cinza grande limpo.jpg", details:["200g ou 500g"], variants:[{label:"200g", price:29.00}, {label:"500g", price:70.00}] },
+          { code:28, id:"camarao-cinza-grande-limpo", name:"Camarão Cinza Grande Limpo", desc:"Opção limpa.", img:"IMG-PEIXES/Camarao cinza grande limpo.jpg", details:["200g ou 500g"], variants:[{label:"200g", price:33.00}, {label:"500g", price:80.00}] },
+          { code:29, id:"camarao-rosa-grande-limpo", name:"Camarão Rosa Grande Limpo", desc:"Produto especial.", img:"IMG-PEIXES/Camarao rosa grande limpo.jpg", details:["250g • R$105", "Kg • R$420"], variants:[{label:"250g", price:105.00}, {label:"1 Kg", price:420.00}] },
+          { code:30, id:"camarao-rosa-grande-inteiro", name:"Camarão Rosa Grande Inteiro", desc:"Produto especial.", img:"IMG-PEIXES/camarao rosa inteiro.jpg", details:["500g • R$105", "Kg • R$210"], variants:[{label:"500g", price:105.00}, {label:"1 Kg", price:210.00}] },
+          { code:31, id:"lula-aneis", name:"Lula em Anéis", desc:"Ótima para porções e frituras.", img:"IMG-PEIXES/lula em aneis.jpg", details:["250g • R$28", "Kg • R$110"], variants:[{label:"250g", price:28.00}, {label:"1 Kg", price:110.00}] },
+          { code:32, id:"tentaculos-polvo", name:"Tentáculos de Polvo Cong.", desc:"Origem Portugal.", img:"IMG-PEIXES/tentaculo de polvo.jpg", details:["600g"], variants:[{label:"600g", price:169.00}] },
+          { code:33, id:"polvo-inteiro-nacional", name:"Polvo Inteiro", desc:"Nacional fresco e eviscerado. Faixa de 2 a 3 kg.", img:"IMG-PEIXES/polvo inteiro fresco.jpgjpg", details:["2 a 3 Kg"], variants:[{label:"Peça", price:148.00}] },
+          { code:34, id:"polvo-inteiro-espanhol", name:"Polvo Inteiro Cong.", desc:"Espanhol eviscerado. Faixa de 1,5 a 2 kg.", img:"IMG-PEIXES/polvo inteiro.jpg", details:["1,5 a 2 Kg"], variants:[{label:"Peça", price:168.00}] },
+          
+          { code:36, id:"kani-kama", name:"Kani Kama Cong.", desc:"Muito usado em pratos orientais.", img:"IMG-PEIXES/kani kama.jpg", details:["250g"], variants:[{label:"250g", price:18.00}] },
+          { code:37, id:"mexilhao", name:"Mexilhão Cong.", desc:"Venda por kg.", img:"IMG-PEIXES/mexilhao.jpg", details:["R$50/Kg"], variants:[{label:"1 Kg", price:50.00}] }
+        ]
+      },
+      {
+        id:"sashimi-bandeja",
+        title:"Sashimi na Bandeja",
+        desc:"Sashimis montados em bandeja, prontos para consumo.",
+        items:[
+          { code:38, id:"sashimi-atum", name:"Sashimi de Atum", desc:"Bandeja pronta.", img:"logo.jpg", details:["400g"], variants:[{label:"400g", price:69.00}] },
+          { code:39, id:"sashimi-salmao", name:"Sashimi de Salmão", desc:"Bandeja pronta.", img:"IMG-Peixes/shashimi de salmão.jpg", details:["400g"], variants:[{label:"400g", price:68.00}] },
+          { code:40, id:"sashimi-st-peter", name:"Sashimi de St. Peter", desc:"Bandeja pronta.", img:"logo.jpg", details:["400g"], variants:[{label:"400g", price:48.00}] },
+          { code:41, id:"sashimi-misto", name:"Sashimi Misto", desc:"Atum, salmão e St. Peter.", img:"logo.jpg", details:["400g"], variants:[{label:"400g", price:60.00}] }
+        ]
+      },
+      {
+        id:"sushi-bento",
+        title:"Sushi e Sashimi (Bentô)",
+        desc:"Combinados e porções orientais prontas.",
+        items:[
+          { code:42, id:"combinado-misto-17", name:"Combinado Sushi Misto 17 Peças", desc:"6 sashimi (3 salmão / 3 St. Peter), 3 niguiri salmão, 4 uramaki (2 salmão / 2 california), 4 hossomaki (2 pepino / 2 salmão).", img:"IMG-peixes/COMBINADO SUSHI MISTO FECHADO.jpg", details:["17 peças"], variants:[{label:"17 peças", price:32.00}] },
+          { code:43, id:"combinado-salmao-17", name:"Combinado Sushi Salmão 17 Peças", desc:"6 sashimi salmão, 3 niguiri salmão, 4 uramaki salmão, 4 hossomaki salmão.", img:"IMG-peixes/combinado de sushi de salmao.jpg", details:["17 peças"], variants:[{label:"17 peças", price:38.00}] },
+          { code:44, id:"combinado-atum-17", name:"Combinado Sushi Atum 17 Peças", desc:"6 sashimi atum, 3 niguiri atum, 4 uramaki atum, 4 hossomaki atum.", img:"IMG-peixes/combinado de sushi de atum.jpg", details:["17 peças"], variants:[{label:"17 peças", price:40.00}] },
+          { code:45, id:"hossomaki-misto-24", name:"Hossomaki Misto 24 Peças", desc:"Combinado pronto.", img:"IMG-peixes/homossami misto.jpg", details:["24 peças"], variants:[{label:"24 peças", price:31.00}] },
+          { code:46, id:"sashimi-st-peter-12", name:"Sashimi St. Peter 12 Fatias", desc:"Porção pronta.", img:"IMG-peixes/SASHIMI MISTO 12 FATIAS.jpg", details:["12 fatias"], variants:[{label:"12 fatias", price:27.00}] },
+          { code:47, id:"sashimi-salmao-12", name:"Sashimi Salmão 12 Fatias", desc:"Porção pronta.", img:"IMG-peixes/sashim salmaoi 12 fatias.jpg", details:["12 fatias"], variants:[{label:"12 fatias", price:36.00}] },
+          { code:48, id:"sashimi-atum-12", name:"Sashimi Atum 12 Fatias", desc:"Porção pronta.", img:"IMG-peixes/sashimi de atum.jpg", details:["12 fatias"], variants:[{label:"12 fatias", price:36.00}] },
+          { code:49, id:"sashimi-misto-12", name:"Sashimi Misto", desc:"4 salmão, 4 atum, 4 St. Peter.", img:"IMG-peixes/sashimi misto.jpg", details:["12 fatias"], variants:[{label:"12 fatias", price:33.00}] }
+        ]
+      },
+      {
+        id:"aperitivos",
+        title:"Aperitivos",
+        desc:"Produtos práticos para aquecer ou fritar.",
+        items:[
+          { code:50, id:"empada-camarao", name:"Empada de Camarão", desc:"Só aquecer.", img:"IMG-Peixes/empada de camarão.jpg", details:["6 unidades", "250g"], variants:[{label:"6 unidades • 250g", price:30.00}] },
+          { code:51, id:"coxinha-camarao", name:"Coxinha de Camarão", desc:"Produto pronto.", img:"IMG-Peixes/coxinha de camarão.jpg", details:["10 unidades", "350g"], variants:[{label:"10 unidades • 350g", price:28.00}] },
+          { code:52, id:"bolinho-st-peter", name:"Bolinhos de St. Peter", desc:"Produto pronto.", img:"IMG-Peixes/bolinho st peter.jpg", details:["20 unidades", "350g"], variants:[{label:"20 unidades • 350g", price:22.00}] },
+          { code:53, id:"croquete-salmao", name:"Croquete de Salmão", desc:"Para fritar.", img:"IMG-Peixes/croquete de salmão.jpg", details:["20 unidades", "350g"], variants:[{label:"20 unidades • 350g", price:24.00}] }
+        ]
+      }
+    ];
+
+    let activeCategory = MENU[0].id;
+    let cart = [];
+    let routeInfo = null;
+    let cepValidated = false;
+    let forcedContinue = false;
+
+    let currentImageModalId = null;
+    let imageModalTimer = null;
+
+    const tabsEl = document.getElementById("tabs");
+    const menuGridEl = document.getElementById("menuGrid");
+    const categoryTitleEl = document.getElementById("categoryTitle");
+    const categoryDescEl = document.getElementById("categoryDesc");
+    const searchInput = document.getElementById("searchInput");
+    const bagCountEl = document.getElementById("bagCount");
+
+    const drawer = document.getElementById("drawer");
+    const backdrop = document.getElementById("backdrop");
+    const cartBody = document.getElementById("cartBody");
+    const subtotalLine = document.getElementById("subtotalLine");
+    const shippingLine = document.getElementById("shippingLine");
+    const totalLine = document.getElementById("totalLine");
+    const toast = document.getElementById("toast");
+
+    const openCartBtn = document.getElementById("openCartBtn");
+    const closeCartBtn = document.getElementById("closeCartBtn");
+    const checkoutBtn = document.getElementById("checkoutBtn");
+    const heroFinishBtn = document.getElementById("heroFinishBtn");
+
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const checkoutModal = document.getElementById("checkoutModal");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+
+    const customerName = document.getElementById("customerName");
+    const customerCep = document.getElementById("customerCep");
+    const customerStreet = document.getElementById("customerStreet");
+    const customerNumber = document.getElementById("customerNumber");
+    const customerDistrict = document.getElementById("customerDistrict");
+    const customerCity = document.getElementById("customerCity");
+    const customerComplement = document.getElementById("customerComplement");
+    const paymentMethod = document.getElementById("paymentMethod");
+    const customerObs = document.getElementById("customerObs");
+
+    const validateCepBtn = document.getElementById("validateCepBtn");
+    const changeCepBtn = document.getElementById("changeCepBtn");
+    const continueAnywayBtn = document.getElementById("continueAnywayBtn");
+    const sendWhatsBtn = document.getElementById("sendWhatsBtn");
+    const cepResult = document.getElementById("cepResult");
+
+    const modalSubtotal = document.getElementById("modalSubtotal");
+    const modalShipping = document.getElementById("modalShipping");
+    const modalTotal = document.getElementById("modalTotal");
+
+    const imageModalBackdrop = document.getElementById("imageModalBackdrop");
+    const imageModal = document.getElementById("imageModal");
+    const imageModalImg = document.getElementById("imageModalImg");
+    const imageModalCaption = document.getElementById("imageModalCaption");
+    const imageCloseBtn = document.getElementById("imageCloseBtn");
+
+    function normalizeText(str){
+      return (str || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    }
+
+    function money(v){
+      return v.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
+    }
+
+    function formatCep(value){
+      const digits = (value || "").replace(/\D/g, "").slice(0, 8);
+      if(digits.length <= 5) return digits;
+      return digits.slice(0, 5) + "-" + digits.slice(5);
+    }
+
+    function getItemById(itemId){
+      for(const category of MENU){
+        for(const item of category.items){
+          if(item.id === itemId) return item;
+        }
+      }
+      return null;
+    }
+
+    function getActiveCategory(){
+      return MENU.find(c => c.id === activeCategory);
+    }
+
+    function getDynamicUnitPrice(itemId, qty, fallbackPrice){
+      if(itemId === "hamburguer-tilapia"){
+        return qty >= 4 ? 8.00 : 8.50;
+      }
+      if(itemId === "hamburguer-salmao"){
+        return qty >= 4 ? 10.50 : 11.00;
+      }
+      return fallbackPrice;
+    }
+
+    function getDisplayUnitLabel(item){
+      if(item.id === "hamburguer-tilapia" || item.id === "hamburguer-salmao"){
+        return "1 unidade";
+      }
+      return item.variants?.[0]?.label || "";
+    }
+
+    customerCep.addEventListener("input", (e) => {
+      e.target.value = formatCep(e.target.value);
+    });
+
+    function openImageModal(src, title, itemId){
+      if(!src) return;
+
+      if(currentImageModalId === itemId && imageModal.classList.contains("open")){
+        closeImageModal();
+        return;
+      }
+
+      currentImageModalId = itemId;
+      imageModalImg.src = src;
+      imageModalImg.alt = title || "Imagem do produto";
+      imageModalCaption.textContent = title || "";
+
+      imageModalBackdrop.classList.add("open");
+      imageModal.classList.add("open");
+
+      clearTimeout(imageModalTimer);
+      imageModalTimer = setTimeout(() => {
+        closeImageModal();
+      }, 5000);
+    }
+
+    function closeImageModal(){
+      imageModalBackdrop.classList.remove("open");
+      imageModal.classList.remove("open");
+      clearTimeout(imageModalTimer);
+      imageModalTimer = null;
+      currentImageModalId = null;
+    }
+
+    imageModalBackdrop.addEventListener("click", closeImageModal);
+    imageCloseBtn.addEventListener("click", closeImageModal);
+
+    function renderTabs(){
+      tabsEl.innerHTML = "";
+      MENU.forEach(cat => {
+        const tab = document.createElement("button");
+        tab.className = "tab" + (cat.id === activeCategory ? " active" : "");
+        tab.innerHTML = `<span class="tab-emoji">${CATEGORY_ICONS[cat.id] || "•"}</span><span>${cat.title}</span>`;
+        tab.onclick = () => {
+          activeCategory = cat.id;
+          renderTabs();
+          renderMenu();
+          window.scrollTo({ top: document.getElementById("menuSection").offsetTop - 70, behavior: "smooth" });
+        };
+        tabsEl.appendChild(tab);
+      });
+    }
+
+    function renderMenu(){
+      const cat = getActiveCategory();
+      if(!cat) return;
+
+      categoryTitleEl.textContent = `${CATEGORY_ICONS[cat.id] || ""} ${cat.title}`;
+      categoryDescEl.textContent = cat.desc || "Veja os itens desta categoria.";
+
+      const q = normalizeText(searchInput.value || "");
+      const items = cat.items.filter(item => {
+        if(!q) return true;
+        const hay = normalizeText(
+          item.name + " " +
+          (item.desc || "") + " " +
+          (item.details || []).join(" ") + " " +
+          cat.title
+        );
+        return hay.includes(q);
+      });
+
+      menuGridEl.innerHTML = "";
+
+      if(items.length === 0){
+        menuGridEl.innerHTML = `<div style="color:var(--muted);line-height:1.6;padding:10px 2px;">Nenhum item encontrado nesta busca.</div>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "item";
+        card.id = `item-${item.id}`;
+
+        const defaultPrice = item.variants[0].price;
+
+        card.innerHTML = `
+          <div class="item-img item-media-trigger" data-open-image="${item.id}">
+            <img src="${item.img || "logo.jpg"}" alt="${item.name}">
+            <div class="item-photo-btn">
+              <span class="photo-chip">🔎 Ver foto</span>
+            </div>
+          </div>
+
+          <div class="item-body">
+            <div class="item-head">
+              <div class="item-title clickable" data-open-image="${item.id}">${item.name}</div>
+              <div class="item-code">#${item.code}</div>
+            </div>
+
+            <div class="item-desc">${item.desc || ""}</div>
+
+            <div class="item-meta">
+              ${(item.details || []).map(d => `<span class="pill">${d}</span>`).join("")}
+            </div>
+
+            <div class="item-row">
+              <div class="picker">
+                <label>Escolha</label>
+                <select data-item="${item.id}">
+                  ${item.variants.map((v, idx) => `<option value="${idx}">${v.label} • ${money(v.price)}</option>`).join("")}
+                </select>
+              </div>
+
+              <div class="price" id="price-${item.id}">${money(defaultPrice)}</div>
+            </div>
+
+            <div class="item-bottom-actions">
+              <textarea class="item-note-inline" id="note-inline-${item.id}" placeholder="Observação do item (opcional)"></textarea>
+              <div class="item-row">
+                <button class="add-btn" data-add="${item.id}">Adicionar à prévia</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        menuGridEl.appendChild(card);
+
+        const select = card.querySelector(`select[data-item="${item.id}"]`);
+        const priceEl = card.querySelector(`#price-${item.id}`);
+        const noteEl = card.querySelector(`#note-inline-${item.id}`);
+
+        select.addEventListener("change", () => {
+          const variant = item.variants[Number(select.value)];
+          priceEl.textContent = money(variant.price);
+        });
+
+        card.querySelector(`[data-add="${item.id}"]`).addEventListener("click", () => {
+          addToCart(item, Number(select.value), noteEl.value.trim());
+          noteEl.value = "";
+        });
+
+        card.querySelectorAll(`[data-open-image="${item.id}"]`).forEach(el => {
+          el.addEventListener("click", () => {
+            openImageModal(item.img || "logo.jpg", item.name, item.id);
+          });
+        });
+      });
+    }
+
+    function cartCount(){
+      return cart.reduce((acc, item) => acc + item.qty, 0);
+    }
+
+    function subtotal(){
+      return cart.reduce((acc, item) => {
+        const effectivePrice = getDynamicUnitPrice(item.itemId, item.qty, item.baseUnitPrice);
+        return acc + (effectivePrice * item.qty);
+      }, 0);
+    }
+
+    function shippingValue(){
+      return subtotal() >= FREE_SHIPPING_FROM ? 0 : SHIPPING;
+    }
+
+    function totalValue(){
+      return subtotal() + shippingValue();
+    }
+
+    function updateBag(){
+      bagCountEl.textContent = cartCount();
+    }
+
+    function updateCheckoutSummary(){
+      modalSubtotal.textContent = money(subtotal());
+      modalShipping.textContent = shippingValue() === 0 ? "Grátis" : money(shippingValue());
+      modalTotal.textContent = money(totalValue());
+      subtotalLine.textContent = money(subtotal());
+      shippingLine.textContent = shippingValue() === 0 ? "Grátis" : money(shippingValue());
+      totalLine.textContent = money(totalValue());
+    }
+
+    function addToCart(item, variantIndex, inlineNote = ""){
+      const variant = item.variants[variantIndex];
+      const key = `${item.id}::${variant.label}`;
+
+      const existing = cart.find(x => x.key === key);
+      if(existing){
+        existing.qty += 1;
+        if(inlineNote){
+          existing.note = existing.note
+            ? `${existing.note} | ${inlineNote}`
+            : inlineNote;
+        }
+      } else {
+        cart.push({
+          key,
+          itemId: item.id,
+          code: item.code,
+          name: item.name,
+          variantLabel: variant.label,
+          baseUnitPrice: variant.price,
+          qty: 1,
+          note: inlineNote || ""
+        });
+      }
+
+      updateBag();
+      renderCart();
+      updateCheckoutSummary();
+      openCart();
+    }
+
+    function renderCart(){
+      updateCheckoutSummary();
+
+      if(cart.length === 0){
+        cartBody.innerHTML = `<div class="cart-empty">Sua sacolinha está vazia.<br>Adicione itens do cardápio para continuar.</div>`;
+        return;
+      }
+
+      cartBody.innerHTML = "";
+
+      cart.forEach((item, index) => {
+        const itemData = getItemById(item.itemId);
+        const unitLabel = itemData ? getDisplayUnitLabel(itemData) : item.variantLabel;
+        const effectivePrice = getDynamicUnitPrice(item.itemId, item.qty, item.baseUnitPrice);
+        const lineTotal = effectivePrice * item.qty;
+
+        const el = document.createElement("div");
+        el.className = "cart-item";
+
+        el.innerHTML = `
+          <div class="cart-top">
+            <div>
+              <div class="cart-title">#${item.code} • ${item.name}</div>
+              <div class="cart-meta">${unitLabel} • ${money(effectivePrice)} cada</div>
+            </div>
+
+            <div style="text-align:right;">
+              <div style="font-weight:1000;">${money(lineTotal)}</div>
+              <div class="remove" data-remove="${index}">Remover</div>
+            </div>
+          </div>
+
+          <div class="qty">
+            <div class="qbtn" data-dec="${index}">−</div>
+            <span>${item.qty}</span>
+            <div class="qbtn" data-inc="${index}">+</div>
+          </div>
+
+          <div class="notes">
+            <label>Observação do item</label>
+            <textarea data-note="${index}" placeholder="Ex: cortar em cubos, sem pele, etc.">${item.note || ""}</textarea>
+          </div>
+        `;
+
+        cartBody.appendChild(el);
+
+        el.querySelector(`[data-inc="${index}"]`).onclick = () => {
+          item.qty += 1;
+          updateBag();
+          renderCart();
+        };
+
+        el.querySelector(`[data-dec="${index}"]`).onclick = () => {
+          item.qty -= 1;
+          if(item.qty <= 0) cart.splice(index, 1);
+          updateBag();
+          renderCart();
+        };
+
+        el.querySelector(`[data-remove="${index}"]`).onclick = () => {
+          cart.splice(index, 1);
+          updateBag();
+          renderCart();
+        };
+
+        el.querySelector(`[data-note="${index}"]`).addEventListener("input", (e) => {
+          item.note = e.target.value;
+        });
+      });
+    }
+
+    function openCart(){
+      drawer.classList.add("open");
+      backdrop.classList.add("open");
+      renderCart();
+    }
+
+    function closeCart(){
+      drawer.classList.remove("open");
+      backdrop.classList.remove("open");
+    }
+
+    function openCheckoutModal(){
+      if(cart.length === 0){
+        alert("Sua sacolinha está vazia. Adicione itens antes de finalizar.");
+        return;
+      }
+      updateCheckoutSummary();
+      modalBackdrop.classList.add("open");
+      checkoutModal.classList.add("open");
+      closeCart();
+    }
+
+    function closeCheckoutModal(){
+      modalBackdrop.classList.remove("open");
+      checkoutModal.classList.remove("open");
+    }
+
+    openCartBtn.addEventListener("click", openCart);
+    closeCartBtn.addEventListener("click", closeCart);
+    backdrop.addEventListener("click", closeCart);
+
+    checkoutBtn.addEventListener("click", openCheckoutModal);
+    heroFinishBtn.addEventListener("click", openCheckoutModal);
+
+    closeModalBtn.addEventListener("click", closeCheckoutModal);
+    modalBackdrop.addEventListener("click", closeCheckoutModal);
+
+    searchInput.addEventListener("input", renderMenu);
+
+    function showToast(message){
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function daysText(days){
+      const map = {1:"segunda",2:"terça",3:"quarta",4:"quinta",5:"sexta",6:"sábado"};
+      return days.map(d => map[d]).join(", ");
+    }
+
+    function weekdayName(day){
+      const map = {0:"domingo",1:"segunda",2:"terça",3:"quarta",4:"quinta",5:"sexta",6:"sábado"};
+      return map[day] || "";
+    }
+
+
+function resolveRoute(addressData){
+  const city = normalizeText(addressData.localidade || "");
+  const bairro = normalizeText(addressData.bairro || "");
+  const uf = normalizeText(addressData.uf || "");
+
+  if(uf !== "sp"){
+    return {
+      served:false,
+      name:"Fora da área atendida",
+      days:[],
+      note:"Atendimento somente nas regiões cadastradas em São Paulo.",
+      reason:"fora-da-regra"
+    };
+  }
+
+  /* =========================
+     REGIÕES NÃO ATENDIDAS
+  ========================= */
+  if(city.includes("guarulhos")){
+    return {
+      served:false,
+      name:"Guarulhos",
+      days:[],
+      note:"No momento Guarulhos não é atendido.",
+      reason:"nao-atende"
+    };
+  }
+
+  if(city.includes("embu") || city.includes("embu das artes")){
+    return {
+      served:false,
+      name:"Embu",
+      days:[],
+      note:"No momento Embu não é atendido.",
+      reason:"nao-atende"
+    };
+  }
+
+  if(city.includes("maua") || city.includes("mauá") || city.includes("mauá")){
+    return {
+      served:false,
+      name:"Mauá",
+      days:[],
+      note:"No momento Mauá não é atendida.",
+      reason:"nao-atende"
+    };
+  }
+
+  /* =========================
+     ZONA LESTE ATUALIZADA
+     (baseado na imagem enviada)
+     MOOCA + VILA PRUDENTE +
+     PARQUE SÃO LUCAS +
+     PENHA DE FRANÇA +
+     VILA MATILDE
+     Regra: segunda e sábado
+  ========================= */
+  const zonaLesteAtualizada = [
+    "mooca",
+    "alto da mooca",
+    "parque da mooca",
+    "vila prudente",
+    "parque sao lucas",
+    "parque são lucas",
+    "sao lucas",
+    "são lucas",
+    "vila ema",
+    "agua rasa",
+    "água rasa",
+    "penha de franca",
+    "penha de frança",
+    "vila matilde"
+  ];
+
+  if (zonaLesteAtualizada.some(r => bairro.includes(r))) {
+    return {
+      served:true,
+      name:"Zona Leste (Mooca / Vila Prudente / Penha / Vila Matilde)",
+      days:[1,6],
+      note:"Atendimento às segundas e sábados para a região da Mooca, Vila Prudente, Parque São Lucas, Penha de França e Vila Matilde.",
+      reason:"rota-especifica"
+    };
+  }
+
+  /* =========================
+     ITAIM BIBI
+  ========================= */
+  if(bairro.includes("itaim bibi")){
+    return {
+      served:true,
+      name:"Itaim Bibi",
+      days:[1,2,3,4,5,6],
+      note:"Atendimento todos os dias úteis de segunda a sábado.",
+      reason:"rota-especifica"
+    };
+  }
+
+  /* =========================
+     BUTANTÃ
+  ========================= */
+  if(
+    bairro.includes("butanta") ||
+    bairro.includes("butantã")
+  ){
+    return {
+      served:true,
+      name:"Butantã",
+      days:[1,2,3,4,5,6],
+      note:"Atendimento todos os dias úteis de segunda a sábado.",
+      reason:"rota-especifica"
+    };
+  }
+
+  /* =========================
+     OSASCO
+  ========================= */
+  if(city.includes("osasco")){
+    return {
+      served:true,
+      name:"Osasco",
+      days:[1,2,3,4,5,6],
+      note:"Atendimento todos os dias úteis de segunda a sábado.",
+      reason:"rota-especifica"
+    };
+  }
+
+  /* =========================
+     COTIA
+  ========================= */
+  if(city.includes("cotia")){
+    return {
+      served:true,
+      name:"Cotia",
+      days:[2,6],
+      note:"Atendimento às terças e sábados.",
+      reason:"rota-especifica"
+    };
+  }
+
+  /* =========================
+     TABOÃO DA SERRA
+  ========================= */
+  if(
+    city.includes("taboao da serra") ||
+    city.includes("taboão da serra") ||
+    bairro.includes("taboao") ||
+    bairro.includes("taboão")
+  ){
+    return {
+      served:true,
+      name:"Taboão",
+      days:[1,2,3,4,5,6],
+      note:"Atendimento todos os dias úteis de segunda a sábado.",
+      reason:"rota-especifica"
+    };
+  }
+
+  /* =========================
+     VILA JOANIZA
+  ========================= */
+  if(bairro.includes("vila joaniza")){
+    return {
+      served:true,
+      name:"Vila Joaniza",
+      days:[1,4],
+      note:"Atendimento às segundas e quintas.",
+      reason:"rota-especifica"
+    };
+  }
+
+  /* =========================
+     INTERLAGOS / GUARAPIRANGA
+  ========================= */
+  if(
+    bairro.includes("interlagos") ||
+    bairro.includes("guarapiranga")
+  ){
+    return {
+      served:true,
+      name:"Interlagos / Guarapiranga",
+      days:[1,3,5],
+      note:"Atendimento às segundas, quartas e sextas.",
+      reason:"rota-especifica"
+    };
+  }
+
+  /* =========================
+     ABC ATUALIZADO
+  ========================= */
+
+  // SÃO BERNARDO DO CAMPO
+  const sbcBairros = [
+    "baeta neves",
+    "ferrazopolis",
+    "ferrazópolis",
+    "planalto",
+    "demarchi",
+    "centro"
+  ];
+
+  if (
+    city.includes("sao bernardo do campo") ||
+    city.includes("são bernardo do campo")
+  ) {
+    if (sbcBairros.some(r => bairro.includes(r))) {
+      return {
+        served:true,
+        name:"São Bernardo do Campo",
+        days:[1,4],
+        note:"Atendimento em São Bernardo do Campo às segundas e quintas para os bairros cadastrados.",
+        reason:"rota-especifica"
+      };
+    }
+
+    return {
+      served:false,
+      name:"São Bernardo do Campo",
+      days:[],
+      note:"Atendemos apenas bairros específicos de São Bernardo do Campo.",
+      reason:"fora-da-lista"
+    };
+  }
+
+  // SANTO ANDRÉ
+  const santoAndreBairros = [
+    "vila assuncao",
+    "vila assunção",
+    "centro",
+    "jardim",
+    "campestre",
+    "utinga",
+    "jardim utinga",
+    "jardim das maravilhas",
+    "vila metalurgica",
+    "vila metalúrgica",
+    "vila camilopolis",
+    "vila camilópolis",
+    "parque das nacoes",
+    "parque das nações",
+    "vila lucinda",
+    "vila francisco matarazzo",
+    "vila bartira",
+    "bangu",
+    "vila sao pedro",
+    "vila são pedro",
+    "santa teresinha",
+    "vila bastos",
+    "vila guiomar"
+  ];
+
+  if (
+    city.includes("santo andre") ||
+    city.includes("santo andré")
+  ) {
+    if (santoAndreBairros.some(r => bairro.includes(r))) {
+      return {
+        served:true,
+        name:"Santo André",
+        days:[1,4],
+        note:"Atendimento em Santo André às segundas e quintas para os bairros cadastrados.",
+        reason:"rota-especifica"
+      };
+    }
+
+    return {
+      served:false,
+      name:"Santo André",
+      days:[],
+      note:"Atendemos apenas bairros específicos de Santo André.",
+      reason:"fora-da-lista"
+    };
+  }
+
+  // DIADEMA
+  const diademaBairros = [
+    "centro",
+    "conceicao",
+    "conceição",
+    "serraria"
+  ];
+
+  if (city.includes("diadema")) {
+    if (diademaBairros.some(r => bairro.includes(r))) {
+      return {
+        served:true,
+        name:"Diadema",
+        days:[1,4],
+        note:"Atendimento em Diadema às segundas e quintas para os bairros cadastrados.",
+        reason:"rota-especifica"
+      };
+    }
+
+    return {
+      served:false,
+      name:"Diadema",
+      days:[],
+      note:"Atendemos apenas bairros específicos de Diadema.",
+      reason:"fora-da-lista"
+    };
+  }
+
+  // SÃO CAETANO DO SUL - tudo
+  if (
+    city.includes("sao caetano do sul") ||
+    city.includes("são caetano do sul")
+  ){
+    return {
+      served:true,
+      name:"São Caetano do Sul",
+      days:[1,4],
+      note:"Atendimento em São Caetano do Sul às segundas e quintas.",
+      reason:"rota-especifica"
+    };
+  }
+
+  /* =========================
+     REGIÕES ANTIGAS QUE VOCÊ
+     JÁ TINHA E CONTINUAM
+  ========================= */
+
+  // Santana / Tucuruvi / Pirituba / Imirim / Vila Matilde / Tatuapé
+  // OBS: Vila Matilde já foi puxada para a nova Zona Leste acima.
+  const antigaZonaNorteLeste = [
+    "tatuape",
+    "tatuapé",
+    "pirituba",
+    "imirim",
+    "tucuruvi",
+    "santana"
+  ];
+
+  if (antigaZonaNorteLeste.some(r => bairro.includes(r))) {
+    return {
+      served:true,
+      name:"Zona Norte / Leste",
+      days:[1,6],
+      note:"Atendimento às segundas e sábados.",
+      reason:"rota-especifica"
+    };
+  }
+
+  /* =========================
+     DEFAULT
+  ========================= */
+  return {
+    served:false,
+    name:"Região fora da rota cadastrada",
+    days:[],
+    note:"Sua região não está entre as rotas automáticas cadastradas.",
+    reason:"fora-da-lista"
+  };
+}
+
+
+    function computeDeliveryInfo(route){
+      const now = new Date();
+      const currentDay = now.getDay();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const beforeCutoff = currentHour < 10 || (currentHour === 10 && currentMinute === 0);
+      const todayAvailable = route.days.includes(currentDay);
+
+      let sameDay = false;
+      if(route.served && beforeCutoff && todayAvailable && currentDay !== 0){
+        sameDay = true;
+      }
+
+      let nextDay = null;
+      if(route.served){
+        for(let i = 1; i <= 7; i++){
+          const day = (currentDay + i) % 7;
+          if(route.days.includes(day)){
+            nextDay = day;
+            break;
+          }
+        }
+      }
+
+      return {
+        sameDay,
+        nowText:`Horário do cliente: ${weekdayName(currentDay)} às ${String(currentHour).padStart(2,"0")}:${String(currentMinute).padStart(2,"0")}`,
+        nextText: route.served
+          ? (
+              sameDay
+                ? "Entrega possível hoje no período da tarde, sujeita à confirmação do atendente."
+                : `Próxima entrega provável: ${nextDay !== null ? weekdayName(nextDay) : "sem rota definida"} no período da tarde.`
+            )
+          : "Região não atendida automaticamente."
+      };
+    }
+
+    function showCepResult(type, title, text, tags = []){
+      cepResult.className = `checkout-result show ${type}`;
+      cepResult.innerHTML = `
+        <strong>${title}</strong>
+        <p>${text}</p>
+        ${tags.length ? `<div class="checkout-tags">${tags.map(t => `<span class="pill">${t}</span>`).join("")}</div>` : ""}
+      `;
+    }
+
+    async function validateCep(){
+      const cep = (customerCep.value || "").replace(/\D/g, "");
+      if(cep.length !== 8){
+        showCepResult("warn", "CEP inválido", "Digite um CEP com 8 números para validar a região.");
+        continueAnywayBtn.style.display = "none";
+        cepValidated = false;
+        forcedContinue = false;
+        return;
+      }
+
+      try{
+        validateCepBtn.disabled = true;
+        validateCepBtn.textContent = "Validando...";
+
+        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await res.json();
+
+        if(data.erro){
+          showCepResult("warn", "CEP não encontrado", "Não conseguimos localizar esse CEP. Revise o número ou tente outro.");
+          continueAnywayBtn.style.display = "inline-flex";
+          cepValidated = false;
+          forcedContinue = false;
+          return;
+        }
+
+        customerStreet.value = data.logradouro || "";
+        customerDistrict.value = data.bairro || "";
+        customerCity.value = `${data.localidade || ""} / ${data.uf || ""}`;
+
+        routeInfo = resolveRoute(data);
+        const deliveryInfo = computeDeliveryInfo(routeInfo);
+        forcedContinue = false;
+
+        if(routeInfo.served){
+          cepValidated = true;
+          continueAnywayBtn.style.display = "none";
+
+          showCepResult(
+            "ok",
+            `Região atendida • ${routeInfo.name}`,
+            `${routeInfo.note} ${deliveryInfo.nextText}`,
+            [
+              `Dias: ${daysText(routeInfo.days)}`,
+              deliveryInfo.nowText,
+              subtotal() >= FREE_SHIPPING_FROM ? "Frete grátis acima de R$ 200" : "Frete padrão: R$ 15"
+            ]
+          );
+        } else {
+          cepValidated = false;
+          continueAnywayBtn.style.display = "inline-flex";
+
+          showCepResult(
+            "danger",
+            "Região não atendida automaticamente",
+            `${routeInfo.note} Você pode trocar o CEP ou continuar mesmo assim para mandar a prévia ao atendimento.`,
+            [
+              deliveryInfo.nowText,
+              "Atendimento manual disponível pelo WhatsApp"
+            ]
+          );
+        }
+
+      } catch(err){
+        cepValidated = false;
+        forcedContinue = false;
+        continueAnywayBtn.style.display = "inline-flex";
+        showCepResult("warn", "Erro na validação", "Não foi possível validar o CEP agora. Você pode tentar novamente ou continuar manualmente.");
+      } finally {
+        validateCepBtn.disabled = false;
+        validateCepBtn.textContent = "Validar CEP";
+      }
+    }
+
+    validateCepBtn.addEventListener("click", validateCep);
+
+    changeCepBtn.addEventListener("click", () => {
+      customerCep.value = "";
+      customerStreet.value = "";
+      customerDistrict.value = "";
+      customerCity.value = "";
+      customerNumber.value = "";
+      customerComplement.value = "";
+      routeInfo = null;
+      cepValidated = false;
+      forcedContinue = false;
+      continueAnywayBtn.style.display = "none";
+      cepResult.className = "checkout-result";
+      cepResult.innerHTML = "";
+      customerCep.focus();
+    });
+
+    continueAnywayBtn.addEventListener("click", () => {
+      forcedContinue = true;
+      showCepResult(
+        "warn",
+        "Continuação manual liberada",
+        "Sua região não foi reconhecida automaticamente como atendida, mas você pode enviar a prévia para o WhatsApp e o atendimento irá analisar manualmente.",
+        ["Envio manual liberado", "Atendimento vai confirmar região e entrega"]
+      );
+    });
+
+    function buildAddress(){
+      const street = customerStreet.value.trim();
+      const number = customerNumber.value.trim();
+      const district = customerDistrict.value.trim();
+      const city = customerCity.value.trim();
+      const complement = customerComplement.value.trim();
+
+      let address = street;
+      if(number) address += `, ${number}`;
+      if(district) address += ` • ${district}`;
+      if(city) address += ` • ${city}`;
+      if(complement) address += ` • ${complement}`;
+      return address;
+    }
+
+    function validateCheckoutData(){
+      if(cart.length === 0){
+        alert("Sua sacolinha está vazia. Adicione itens antes de finalizar.");
+        return false;
+      }
+
+      if(!customerName.value.trim()){
+        alert("Preencha seu nome antes de enviar a prévia.");
+        customerName.focus();
+        return false;
+      }
+
+      if(!customerCep.value.trim()){
+        alert("Preencha o CEP antes de enviar a prévia.");
+        customerCep.focus();
+        return false;
+      }
+
+      if(!cepValidated && !forcedContinue){
+        alert("Valide o CEP antes de enviar a prévia ou clique em 'Continuar mesmo assim'.");
+        return false;
+      }
+
+      if(!customerStreet.value.trim()){
+        alert("Valide o CEP para preencher o endereço ou informe um CEP válido.");
+        customerCep.focus();
+        return false;
+      }
+
+      if(!customerNumber.value.trim()){
+        alert("Preencha o número do endereço.");
+        customerNumber.focus();
+        return false;
+      }
+
+      if(!paymentMethod.value){
+        alert("Selecione a forma de pagamento desejada.");
+        paymentMethod.focus();
+        return false;
+      }
+
+      return true;
+    }
+
+    function buildWhatsMessage(){
+      const address = buildAddress();
+      const shipping = shippingValue();
+      const total = totalValue();
+
+      let regionLine = "CEP ainda não validado automaticamente";
+      if(routeInfo){
+        regionLine = routeInfo.served
+          ? `Atendido automaticamente • ${routeInfo.name}`
+          : `Fora da rota automática • ${routeInfo.name}`;
+      }
+      if(forcedContinue && !cepValidated){
+        regionLine = "Continuação manual sem rota validada automaticamente";
+      }
+
+      const lines = [];
+      lines.push("Olá! Quero enviar uma PRÉVIA do meu pedido na Slim Fish 🛍️");
+      lines.push("");
+      lines.push("👤 Dados do cliente:");
+      lines.push(`Nome: ${customerName.value.trim()}`);
+      lines.push(`CEP: ${customerCep.value.trim()}`);
+      lines.push(`Endereço: ${address}`);
+      lines.push(`Pagamento desejado: ${paymentMethod.value}`);
+      lines.push(`Rota/Região: ${regionLine}`);
+
+      if(customerObs.value.trim()){
+        lines.push(`Observação geral: ${customerObs.value.trim()}`);
+      }
+
+      lines.push("");
+      lines.push("🧾 Itens da prévia:");
+
+      cart.forEach((item, index) => {
+        const effectivePrice = getDynamicUnitPrice(item.itemId, item.qty, item.baseUnitPrice);
+        const obs = item.note && item.note.trim() ? ` | Obs do item: ${item.note.trim()}` : "";
+        lines.push(`${index + 1}) #${item.code} ${item.qty}x ${item.name} — ${item.variantLabel} — ${money(effectivePrice)} un. = ${money(effectivePrice * item.qty)}${obs}`);
+      });
+
+      lines.push("");
+      lines.push(`Subtotal: ${money(subtotal())}`);
+      lines.push(`Frete: ${shipping === 0 ? "Grátis" : money(shipping)}`);
+      lines.push(`Total aproximado: ${money(total)}`);
+
+      if(subtotal() >= FREE_SHIPPING_FROM){
+        lines.push("✅ Pedido com frete grátis.");
+      } else {
+        lines.push(`ℹ️ Frete padrão considerado: ${money(SHIPPING)}.`);
+      }
+
+      if(subtotal() < MIN_ORDER){
+        lines.push(`⚠️ Pedido abaixo do mínimo de ${money(MIN_ORDER)}.`);
+      }
+
+      lines.push("");
+      lines.push("⚠️ Sei que o valor final pode mudar por conta da pesagem, contagem e confirmação do frete.");
+      lines.push("Pode confirmar disponibilidade, entrega e valor final? 😊");
+
+      return lines.join("\n");
+    }
+
+    function resetAll(){
+      customerName.value = "";
+      customerCep.value = "";
+      customerStreet.value = "";
+      customerNumber.value = "";
+      customerDistrict.value = "";
+      customerCity.value = "";
+      customerComplement.value = "";
+      paymentMethod.value = "";
+      customerObs.value = "";
+
+      cart = [];
+      routeInfo = null;
+      cepValidated = false;
+      forcedContinue = false;
+
+      continueAnywayBtn.style.display = "none";
+      cepResult.className = "checkout-result";
+      cepResult.innerHTML = "";
+
+      searchInput.value = "";
+      activeCategory = MENU[0].id;
+
+      localStorage.removeItem("slimfish_selected_item");
+      localStorage.removeItem("slimfish_selected_image");
+
+      renderTabs();
+      renderMenu();
+      updateBag();
+      renderCart();
+      updateCheckoutSummary();
+      closeCart();
+      closeCheckoutModal();
+      closeImageModal();
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+sendWhatsBtn.addEventListener("click", () => {
+  if (!validateCheckoutData()) return;
+
+  const confirmSend = confirm("Tem certeza que deseja enviar a prévia no WhatsApp?");
+  if (!confirmSend) return;
+
+  const message = buildWhatsMessage();
+  const encoded = encodeURIComponent(message);
+
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  showToast("✅ Abrindo o WhatsApp...");
+
+  if (isMobile) {
+    // tenta abrir o app
+    window.location.href = `whatsapp://send?phone=${WHATS}&text=${encoded}`;
+
+    // fallback para wa.me caso o app não abra
+    setTimeout(() => {
+      window.location.href = `https://wa.me/${WHATS}?text=${encoded}`;
+    }, 1200);
+  } else {
+    // desktop
+    window.open(`https://wa.me/${WHATS}?text=${encoded}`, "_blank");
+  }
+
+  setTimeout(() => {
+    resetAll();
+  }, 3500);
+});
+
+
+    function highlightIncomingItem(){
+      const params = new URLSearchParams(window.location.search);
+      const selected = params.get("item") || localStorage.getItem("slimfish_selected_item") || "";
+      if(!selected) return;
+
+      const normalizedSelected = normalizeText(selected);
+      let foundCategory = null;
+      let foundItem = null;
+
+      MENU.forEach(category => {
+        category.items.forEach(item => {
+          const itemName = normalizeText(item.name);
+          if(itemName.includes(normalizedSelected) || normalizedSelected.includes(itemName)){
+            foundCategory = category;
+            foundItem = item;
+          }
+        });
+      });
+
+      if(!foundCategory || !foundItem) return;
+
+      activeCategory = foundCategory.id;
+      renderTabs();
+      renderMenu();
+
+      setTimeout(() => {
+        const el = document.getElementById(`item-${foundItem.id}`);
+        if(!el) return;
+        el.classList.add("highlight");
+        el.scrollIntoView({ behavior:"smooth", block:"center" });
+        setTimeout(() => el.classList.remove("highlight"), 3200);
+      }, 300);
+    } 
+
+    renderTabs();
+    renderMenu();
+    renderCart();
+    updateBag();
+    updateCheckoutSummary();
+    highlightIncomingItem();
+  </script>
+</body>
+</html>

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <link rel="icon" type="image/png" href="logo.jpg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simular pedido | Slim Fish</title>
+
+  <style>
+    :root{
+      --primary:#4b0082;
+      --accent:#9d4edd;
+      --brand-orange:#E06020;
+      --brand-orange-dark:#C94F17;
+      --bg:#0b0711;
+      --text:#ffffff;
+
+      --danger:#ff3b30;
+      --danger-dark:#c81d18;
+      --danger-bg: rgba(255,59,48,.14);
+      --danger-border: rgba(255,59,48,.35);
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:"Segoe UI", Arial, sans-serif;
+    }
+
+    body{
+      min-height:100vh;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(157,78,221,.28), transparent 60%),
+        radial-gradient(1200px 600px at 90% 20%, rgba(224,96,32,.22), transparent 60%),
+        radial-gradient(900px 900px at 50% 100%, rgba(75,0,130,.25), transparent 60%),
+        var(--bg);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      overflow-x:hidden;
+    }
+
+    .wrap{
+      width:min(980px, 100%);
+      display:grid;
+      gap:14px;
+    }
+
+    .hero{
+      position:relative;
+      border-radius:26px;
+      padding:26px;
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 24px 60px rgba(0,0,0,.45);
+      overflow:hidden;
+    }
+
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:-80px;
+      background:
+        radial-gradient(circle at 25% 25%, rgba(157,78,221,.35), transparent 55%),
+        radial-gradient(circle at 75% 35%, rgba(224,96,32,.25), transparent 60%);
+      filter:blur(20px);
+      opacity:.9;
+    }
+
+    .top{
+      position:relative;
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin-bottom:10px;
+      z-index:1;
+    }
+
+    .logo{
+      width:56px;
+      height:56px;
+      border-radius:50%;
+      background:#fff;
+      padding:3px;
+      object-fit:cover;
+      box-shadow:0 14px 34px rgba(0,0,0,.35);
+      flex:0 0 auto;
+    }
+
+    .brand h1{
+      font-size:20px;
+      line-height:1.1;
+      font-weight:900;
+      letter-spacing:.3px;
+    }
+
+    .brand p{
+      opacity:.9;
+      font-size:13px;
+      margin-top:4px;
+      line-height:1.4;
+      max-width:720px;
+    }
+
+    .selected-tray{
+      position:relative;
+      z-index:1;
+      margin-top:16px;
+      display:none;
+      background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:24px;
+      padding:16px;
+      box-shadow:0 20px 45px rgba(0,0,0,.20);
+    }
+
+    .selected-tray.show{
+      display:block;
+    }
+
+    .selected-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+      align-items:center;
+    }
+
+    .selected-img{
+      width:100%;
+      max-width:260px;
+      margin:0 auto;
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:0 18px 40px rgba(0,0,0,.28);
+      border:1px solid rgba(255,255,255,.12);
+    }
+
+    .selected-img img{
+      width:100%;
+      height:220px;
+      display:block;
+      object-fit:cover;
+    }
+
+    .selected-copy{
+      text-align:center;
+    }
+
+    .selected-kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(224,96,32,.18);
+      border:1px solid rgba(224,96,32,.30);
+      font-size:12px;
+      font-weight:900;
+      margin-bottom:12px;
+    }
+
+    .selected-copy h2{
+      font-size:24px;
+      line-height:1.15;
+      margin-bottom:8px;
+    }
+
+    .selected-copy p{
+      font-size:14px;
+      line-height:1.6;
+      opacity:.92;
+    }
+
+    .choices{
+      position:relative;
+      display:grid;
+      gap:12px;
+      margin-top:14px;
+      z-index:1;
+    }
+
+    .card{
+      border-radius:22px;
+      padding:18px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      display:flex;
+      gap:14px;
+      align-items:center;
+      transition:transform .2s ease, background .2s ease;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .card:hover{
+      transform:translateY(-3px);
+      background:rgba(255,255,255,.10);
+    }
+
+    .card.preview{
+      border:1px solid rgba(255,59,48,.22);
+      background:linear-gradient(180deg, rgba(255,59,48,.08), rgba(255,255,255,.06));
+    }
+
+    .ic{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:22px;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.14);
+      flex:0 0 auto;
+    }
+
+    .card strong{
+      font-size:16px;
+    }
+
+    .card span{
+      display:block;
+      opacity:.9;
+      font-size:13px;
+      margin-top:4px;
+      line-height:1.35;
+    }
+
+    .btnrow{
+      position:relative;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+      z-index:1;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:14px 18px;
+      border-radius:999px;
+      text-decoration:none;
+      font-weight:900;
+      letter-spacing:.2px;
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 18px 40px rgba(0,0,0,.35);
+      transition:transform .18s ease, filter .18s ease;
+      user-select:none;
+      cursor:pointer;
+    }
+
+    .btn:hover{
+      transform:translateY(-2px);
+    }
+
+    .btn:active{
+      transform:translateY(0) scale(.98);
+      filter:brightness(.95);
+    }
+
+    .btn.orange{
+      background:linear-gradient(135deg, var(--brand-orange), var(--brand-orange-dark));
+      color:#fff;
+    }
+
+    .btn.purple{
+      background:linear-gradient(135deg, var(--primary), var(--accent));
+      color:#fff;
+    }
+
+    .btn.ghost{
+      background:transparent;
+      color:#fff;
+    }
+
+    .fine{
+      position:relative;
+      opacity:.8;
+      font-size:12px;
+      margin-top:10px;
+      line-height:1.4;
+      z-index:1;
+    }
+
+    .fish{
+      position:absolute;
+      right:-120px;
+      bottom:16px;
+      width:140px;
+      opacity:.35;
+      filter:drop-shadow(0 14px 22px rgba(0,0,0,.35));
+      animation:swim 7s linear infinite;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    @keyframes swim{
+      0%{ transform:translateX(0) translateY(0) rotate(0deg); }
+      50%{ transform:translateX(-520px) translateY(-12px) rotate(-2deg); }
+      100%{ transform:translateX(-1040px) translateY(0) rotate(0deg); }
+    }
+
+    .toast{
+      position:fixed;
+      top:14px;
+      left:50%;
+      transform:translateX(-50%) translateY(-18px);
+      width:min(980px, calc(100% - 22px));
+      z-index:9999;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .22s ease, transform .22s ease;
+    }
+
+    .toast.show{
+      opacity:1;
+      pointer-events:auto;
+      transform:translateX(-50%) translateY(0);
+    }
+
+    .toast-inner{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      padding:14px 14px;
+      border-radius:18px;
+      background:linear-gradient(180deg, rgba(255,59,48,.22), rgba(255,59,48,.10));
+      border:1px solid var(--danger-border);
+      box-shadow:0 18px 45px rgba(0,0,0,.45);
+      backdrop-filter:blur(10px);
+    }
+
+    .toast-badge{
+      width:40px;
+      height:40px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      background:rgba(255,59,48,.20);
+      border:1px solid rgba(255,59,48,.35);
+      flex:0 0 auto;
+    }
+
+    .toast-title{
+      font-weight:900;
+      font-size:14px;
+      letter-spacing:.2px;
+      margin-bottom:3px;
+    }
+
+    .toast-text{
+      opacity:.95;
+      font-size:13px;
+      line-height:1.35;
+      max-width:820px;
+    }
+
+    .toast-close{
+      margin-left:auto;
+      width:36px;
+      height:36px;
+      border-radius:12px;
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.12);
+      color:#fff;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      transition:transform .45s ease, background .45s ease;
+      flex:0 0 auto;
+    }
+
+    .toast-close:hover{
+      transform:scale(1.04);
+      background:rgba(255,255,255,.14);
+    }
+
+    .toast-close:active{
+      transform:scale(.98);
+    }
+
+    @media (min-width: 768px){
+      .hero{
+        padding:32px;
+      }
+
+      .brand h1{
+        font-size:26px;
+      }
+
+      .brand p{
+        font-size:14px;
+      }
+
+      .card strong{
+        font-size:18px;
+      }
+
+      .toast-title{
+        font-size:15px;
+      }
+
+      .toast-text{
+        font-size:14px;
+      }
+
+      .selected-grid{
+        grid-template-columns:260px 1fr;
+      }
+
+      .selected-copy{
+        text-align:left;
+      }
+
+      .selected-copy h2{
+        font-size:30px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toast" id="previewToast" role="alert" aria-live="polite">
+    <div class="toast-inner">
+      <div class="toast-badge">⚠️</div>
+      <div>
+        <div class="toast-title">Atenção: aqui é apenas uma prévia</div>
+        <div class="toast-text">
+          O valor pode mudar após <strong>pesagem (kg), contagem</strong> e <strong>frete</strong>.
+          Você vai montar uma <strong>simulação</strong> e enviar a <strong>prévia</strong> no WhatsApp para o atendente finalizar com você.
+        </div>
+      </div>
+      <button class="toast-close" onclick="hideToast()" aria-label="Fechar">✕</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <section class="hero">
+      <img class="fish" src="fish.png" alt="">
+
+      <div class="top">
+        <img class="logo" src="logo.jpg" alt="Slim Fish">
+        <div class="brand">
+          <h1>Como você quer fazer sua prévia?</h1>
+          <p>
+            Você pode <strong>simular uma prévia</strong> do seu pedido ou falar direto com um atendente no WhatsApp.
+          </p>
+        </div>
+      </div>
+
+      <div class="selected-tray" id="selectedTrayBox">
+        <div class="selected-grid">
+          <div class="selected-img">
+            <img id="selectedTrayImage" src="IMG-Peixes/img2.jpeg" alt="">
+          </div>
+
+          <div class="selected-copy">
+            <div class="selected-kicker">🐟 Bandeja selecionada</div>
+            <h2 id="selectedTrayTitle">Tilápia em filé</h2>
+            <p id="selectedTrayText">
+              Você veio da página principal com uma bandeja selecionada. Ao abrir a simulação, este item seguirá destacado para facilitar seu pedido.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="choices">
+        <div class="card preview" onclick="goMenu(true)">
+          <div class="ic">🛒</div>
+          <div>
+            <strong>Simular uma prévia do pedido</strong>
+            <span id="simPreviewText">Monte sua sacolinha, escolha peso/embalagem e envie a prévia no WhatsApp.</span>
+          </div>
+        </div>
+
+        <div class="card" onclick="goWhats()">
+          <div class="ic">💬</div>
+          <div>
+            <strong>Ir direto para o WhatsApp</strong>
+            <span>Fale com um atendente agora mesmo e peça do seu jeito.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <a class="btn purple" href="Menu.html" id="menuButton" onclick="showToast(2200)">Abrir simulação (menu online)</a>
+        <a class="btn orange" href="https://wa.me/5511997308201" target="_blank" rel="noopener">WhatsApp direto</a>
+        <a class="btn ghost" href="Index.html">← Voltar</a>
+      </div>
+
+      <div class="fine">
+        *A simulação é uma prévia: o atendimento confirma o valor final após pesagem, contagem e frete.
+      </div>
+    </section>
+  </div>
+
+<script>
+  const WHATS = "5511997308201";
+  const toastEl = document.getElementById("previewToast");
+  const selectedTrayBox = document.getElementById("selectedTrayBox");
+  const selectedTrayImage = document.getElementById("selectedTrayImage");
+  const selectedTrayTitle = document.getElementById("selectedTrayTitle");
+  const selectedTrayText = document.getElementById("selectedTrayText");
+  const simPreviewText = document.getElementById("simPreviewText");
+  const menuButton = document.getElementById("menuButton");
+
+  let toastTimer = null;
+
+  function showToast(durationMs = 4200){
+    clearTimeout(toastTimer);
+    toastEl.classList.add("show");
+    toastTimer = setTimeout(() => hideToast(), durationMs);
+  }
+
+  function hideToast(){
+    toastEl.classList.remove("show");
+  }
+
+  function getParams(){
+    const params = new URLSearchParams(window.location.search);
+    return {
+      item: params.get("item") || "",
+      img: params.get("img") || ""
+    };
+  }
+
+  const selected = getParams();
+
+  if(selected.item){
+    selectedTrayBox.classList.add("show");
+    selectedTrayTitle.textContent = selected.item;
+    selectedTrayText.textContent = `Você veio da página principal com “${selected.item}”. Ao abrir a simulação, esse item seguirá destacado para facilitar o seu pedido.`;
+    simPreviewText.textContent = `Monte sua sacolinha e siga com “${selected.item}” já destacado na sua prévia.`;
+
+    if(selected.img){
+      selectedTrayImage.src = selected.img;
+      selectedTrayImage.alt = selected.item;
+    }
+
+    const menuUrl = `Menu.html?item=${encodeURIComponent(selected.item)}&img=${encodeURIComponent(selected.img)}`;
+    menuButton.href = menuUrl;
+
+    localStorage.setItem("slimfish_selected_item", selected.item);
+    localStorage.setItem("slimfish_selected_image", selected.img || "");
+  }
+
+  function goMenu(fromCard){
+    showToast(2200);
+
+    const params = new URLSearchParams();
+    if(selected.item) params.set("item", selected.item);
+    if(selected.img) params.set("img", selected.img);
+
+    const nextUrl = params.toString() ? `Menu.html?${params.toString()}` : "Menu.html";
+
+    setTimeout(() => {
+      window.location.href = nextUrl;
+    }, fromCard ? 700 : 0);
+  }
+
+  function goWhats(){
+    let msg = "Olá! Gostaria de fazer um pedido.";
+    if(selected.item){
+      msg = `Olá! Gostaria de fazer um pedido. Tenho interesse na bandeja: ${selected.item}.`;
+    }
+    window.open(`https://wa.me/${WHATS}?text=${encodeURIComponent(msg)}`, "_blank");
+  }
+
+  window.addEventListener("load", () => {
+    showToast(5200);
+  });
+</script>
+</body>
+</html>

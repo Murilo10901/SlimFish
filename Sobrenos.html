@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <link rel="icon" type="image/png" href="logo.jpg">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sobre Nós | Slim Fish</title>
+
+<style>
+:root{
+  --primary:#4b0082;
+  --accent:#9d4edd;
+  --orange:#E06020;
+  --orange-dark:#C94F17;
+  --bg:#07060a;
+  --card: rgba(255,255,255,.08);
+  --glass: rgba(255,255,255,.10);
+  --text:#ffffff;
+  --muted: rgba(255,255,255,.78);
+  --shadow: 0 18px 45px rgba(0,0,0,.45);
+  --radius: 22px;
+  --font: "Segoe UI", Arial, sans-serif;
+
+  --stepDur: 650ms;
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font); }
+html,body{ height:100%; }
+body{
+  background: radial-gradient(1200px 800px at 30% 10%, rgba(157,78,221,.25), transparent 55%),
+              radial-gradient(1200px 800px at 90% 80%, rgba(75,0,130,.35), transparent 55%),
+              var(--bg);
+  color:var(--text);
+  overflow:hidden; /* importante: não é página de scroll */
+}
+
+/* ===== Top Bar (voltar + progresso) ===== */
+.topbar{
+  position:fixed;
+  top:0; left:0; right:0;
+  z-index:50;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:14px 14px;
+  backdrop-filter: blur(12px);
+  background: linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,0));
+}
+
+.brand-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.brand-left img{
+  width:44px; height:44px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#fff;
+  padding:2px;
+  box-shadow: var(--shadow);
+}
+.brand-left strong{
+  font-weight:900;
+  letter-spacing:.5px;
+  font-size:14px;
+  line-height:1;
+}
+.brand-left span{
+  display:block;
+  font-size:12px;
+  opacity:.8;
+  margin-top:2px;
+}
+
+.back{
+  color:#fff;
+  text-decoration:none;
+  font-weight:900;
+  font-size:14px;
+  padding:10px 12px;
+  border-radius:999px;
+  background: rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  transition:.18s ease;
+}
+.back:hover{ transform: translateY(-2px); }
+
+.progress{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.progress-bar{
+  width:120px;
+  height:10px;
+  border-radius:999px;
+  background: rgba(255,255,255,.10);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.10);
+}
+.progress-fill{
+  height:100%;
+  width:0%;
+  background: linear-gradient(90deg, var(--accent), var(--primary));
+  border-radius:999px;
+  transition: width .35s ease;
+}
+.dots{
+  display:flex;
+  gap:6px;
+}
+.dot{
+  width:8px; height:8px;
+  border-radius:50%;
+  background: rgba(255,255,255,.25);
+  transition: .25s ease;
+}
+.dot.active{ background: #fff; transform: scale(1.2); }
+
+/* ===== Stage (slides) ===== */
+.stage{
+  height:100vh;
+  display:grid;
+  place-items:center;
+  padding:72px 16px 22px;
+}
+
+.slide{
+  width:min(980px, 92vw);
+  min-height:min(680px, 78vh);
+  border-radius: var(--radius);
+  overflow:hidden;
+  position:relative;
+  box-shadow: var(--shadow);
+  background: rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);
+}
+
+/* fundo de cada etapa */
+.slide-bg{
+  position:absolute;
+  inset:0;
+  background-size:cover;
+  background-position:center;
+  filter: saturate(1.05) contrast(1.05);
+  transform: scale(1.03);
+}
+.slide-bg::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(1200px 700px at 20% 20%, rgba(157,78,221,.35), transparent 55%),
+    linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.65));
+}
+
+/* conteúdo */
+.slide-content{
+  position:relative;
+  z-index:2;
+  display:grid;
+  gap:14px;
+  padding:26px 20px 22px;
+  height:100%;
+}
+.kicker{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  width:max-content;
+  padding:10px 14px;
+  border-radius:999px;
+  background: rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  font-weight:900;
+  letter-spacing:.4px;
+  font-size:13px;
+  color:#fff;
+}
+.kicker b{ color: var(--orange); }
+
+.title{
+  font-weight:1000;
+  letter-spacing:.2px;
+  font-size:34px;
+  line-height:1.06;
+}
+.subtitle{
+  color: var(--muted);
+  font-size:15px;
+  line-height:1.65;
+  max-width: 56ch;
+}
+
+/* “texto mexendo” */
+.wiggle{
+  display:inline-block;
+  animation: wiggle 2.2s ease-in-out infinite;
+}
+@keyframes wiggle{
+  0%,100%{ transform: translateY(0); }
+  50%{ transform: translateY(-3px); }
+}
+
+/* cards de destaque */
+.stats{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+  margin-top:8px;
+}
+.stat{
+  background: rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;
+  padding:14px;
+}
+.stat strong{
+  font-size:22px;
+  font-weight:1000;
+  color:#fff;
+}
+.stat span{
+  display:block;
+  margin-top:4px;
+  font-size:13px;
+  opacity:.85;
+}
+
+/* área mídia (instagram) */
+.media{
+  margin-top:6px;
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+}
+.media img{
+  width:100%;
+  aspect-ratio: 1 / 1;
+  border-radius:16px;
+  object-fit:cover;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 10px 25px rgba(0,0,0,.25);
+  transition: transform .25s ease;
+}
+.media img:hover{ transform: translateY(-4px); }
+
+/* botões */
+.actions{
+  margin-top:auto;
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:13px 16px;
+  border-radius:999px;
+  text-decoration:none;
+  font-weight:1000;
+  letter-spacing:.2px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.08);
+  color:#fff;
+  box-shadow: 0 14px 30px rgba(0,0,0,.35);
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+.btn:hover{ transform: translateY(-3px); }
+.btn:active{ transform: translateY(-1px) scale(.98); filter: brightness(.95); }
+
+.btn.orange{
+  background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+  border: none;
+}
+.btn.purple{
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border:none;
+}
+.btn.ghost{
+  background: transparent;
+  border:2px solid rgba(255,255,255,.80);
+}
+
+/* hint de navegação */
+.hint{
+  font-size:12px;
+  opacity:.82;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.pill{
+  padding:6px 10px;
+  border-radius:999px;
+  background: rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  font-weight:900;
+}
+
+/* ===== Entrada cinematográfica (vinheta) ===== */
+.intro{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  display:grid;
+  place-items:center;
+  background: radial-gradient(900px 600px at 50% 20%, rgba(157,78,221,.45), transparent 55%),
+              linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.65)),
+              #0a0710;
+}
+
+.intro.hidden{ display:none; }
+
+.split-curtain{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+}
+.curtain{
+  position:absolute;
+  top:0; bottom:0;
+  width:52%;
+  background: linear-gradient(180deg, rgba(75,0,130,1), rgba(157,78,221,1));
+  box-shadow: 0 0 80px rgba(157,78,221,.35);
+}
+.curtain.left{ left:0; transform: translateX(0); }
+.curtain.right{ right:0; transform: translateX(0); }
+.curtain.open.left{ transform: translateX(-105%); transition: transform .9s cubic-bezier(.2,.9,.2,1); }
+.curtain.open.right{ transform: translateX(105%); transition: transform .9s cubic-bezier(.2,.9,.2,1); }
+
+.intro-center{
+  position:relative;
+  z-index:3;
+  text-align:center;
+  padding:0 16px;
+}
+.intro-logo{
+  width:90px; height:90px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#fff;
+  padding:3px;
+  box-shadow: var(--shadow);
+  margin:0 auto 14px;
+}
+.intro-title{
+  font-size:30px;
+  font-weight:1000;
+  letter-spacing:.4px;
+}
+.intro-sub{
+  margin-top:8px;
+  opacity:.85;
+  font-size:14px;
+  line-height:1.5;
+}
+.intro-btn{
+  margin-top:18px;
+}
+
+/* ===== Peixe atravessando (direita -> esquerda) ===== */
+.fish-wrap{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+}
+.fish{
+  position:absolute;
+  right:-140px;
+  top:50%;
+  transform: translateY(-50%);
+  width:120px;
+  filter: drop-shadow(0 18px 20px rgba(0,0,0,.35));
+  animation: swim 2.2s ease-in-out forwards;
+}
+@keyframes swim{
+  0%{ right:-160px; transform: translateY(-50%) rotate(0deg); opacity:0; }
+  10%{ opacity:1; }
+  100%{ right: calc(100% + 200px); transform: translateY(-50%) rotate(-6deg); opacity:1; }
+}
+
+/* rastro roxo */
+.trail{
+  position:absolute;
+  top:50%;
+  right:-40px;
+  transform: translateY(-50%);
+  width:60vw;
+  height:120px;
+  background: radial-gradient(circle at 80% 50%, rgba(157,78,221,.0), rgba(157,78,221,.0) 40%),
+              linear-gradient(90deg, rgba(157,78,221,.0), rgba(157,78,221,.55), rgba(75,0,130,.35), rgba(157,78,221,.0));
+  filter: blur(12px);
+  opacity:0;
+  animation: trail 2.2s ease-in-out forwards;
+}
+@keyframes trail{
+  0%{ opacity:0; }
+  15%{ opacity:1; }
+  100%{ opacity:0; transform: translate(-55vw, -50%); }
+}
+
+/* ===== Transição entre etapas ===== */
+.transition{
+  position:fixed;
+  inset:0;
+  z-index:120;
+  pointer-events:none;
+  opacity:0;
+}
+.transition.on{
+  opacity:1;
+  animation: wipe var(--stepDur) ease forwards;
+}
+@keyframes wipe{
+  0%{
+    background: linear-gradient(90deg, rgba(157,78,221,0), rgba(75,0,130,0));
+  }
+  20%{
+    background: linear-gradient(90deg, rgba(157,78,221,.95), rgba(75,0,130,.95));
+  }
+  80%{
+    background: linear-gradient(90deg, rgba(75,0,130,.95), rgba(157,78,221,.95));
+  }
+  100%{
+    background: linear-gradient(90deg, rgba(157,78,221,0), rgba(75,0,130,0));
+  }
+}
+
+/* ===== Animação de entrada de texto por slide ===== */
+.enter{
+  animation: enter .65s cubic-bezier(.2,.9,.2,1) both;
+}
+@keyframes enter{
+  from{ opacity:0; transform: translateY(18px); filter: blur(6px); }
+  to{ opacity:1; transform: translateY(0); filter: blur(0); }
+}
+
+/* ===== Mobile refinado ===== */
+@media (max-width: 380px){
+  .title{ font-size:30px; }
+  .stats{ grid-template-columns:1fr; }
+}
+
+/* ===== Desktop ===== */
+@media (min-width: 860px){
+  .title{ font-size:54px; }
+  .subtitle{ font-size:17px; }
+  .slide-content{ padding:34px 34px 26px; }
+  .progress-bar{ width:180px; }
+  .stats{ grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand-left">
+    <!-- TROQUE PARA O SEU LOGO -->
+    <img src="logo.jpg" alt="Slim Fish">
+    <div>
+      <strong>Slim Fish</strong>
+      <span>Experiência • Sobre Nós</span>
+    </div>
+  </div>
+
+  <div class="progress">
+    <a class="back" href="Index.html">← Voltar</a>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="dots" id="dots"></div>
+  </div>
+</div>
+
+<!-- INTRO CINEMÁTICA -->
+<div class="intro" id="intro">
+  <div class="split-curtain">
+    <div class="curtain left" id="curtainL"></div>
+    <div class="curtain right" id="curtainR"></div>
+  </div>
+
+  <div class="fish-wrap" id="fishWrap" style="display:none;">
+    <!-- TROQUE fish.png por um PNG de peixinho (transparente) -->
+    <div class="trail"></div>
+    <img class="fish" src="fish.png" alt="Peixe animado">
+  </div>
+
+  <div class="intro-center">
+    <img class="intro-logo" src="logo.jpg" alt="Slim Fish">
+    <div class="intro-title"><span class="wiggle">Slim Fish</span></div>
+    <div class="intro-sub">
+      Uma experiência rápida para você conhecer nossa história.<br>
+      Toque em <b style="color:var(--orange)">COMEÇAR</b>.
+    </div>
+    <div class="intro-btn">
+      <button class="btn orange" id="startBtn">COMEÇAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRANSIÇÃO ROXA -->
+<div class="transition" id="transition"></div>
+
+<!-- STAGE -->
+<div class="stage">
+  <div class="slide" id="slide">
+    <div class="slide-bg" id="slideBg"></div>
+    <div class="slide-content" id="slideContent"></div>
+  </div>
+</div>
+
+<script>
+/* =========================
+   CONFIG: etapas (slides)
+========================= */
+const steps = [
+  {
+    bg: "sobre-bg-1.jpg", // troque
+    kicker: "Quem somos nós",
+    title: "Tradição desde <span style='color:var(--orange)'>1990</span>.",
+    subtitle: "Uma jornada guiada por qualidade, procedência e confiança  do primeiro atendimento até a sua mesa.",
+    blocks: [
+      { strong: "Desde 1990", span: "História e experiência no ramo" },
+      { strong: "Alta qualidade", span: "Seleção e cuidado em cada pedido" },
+    ],
+    primary: { text: "CONTINUAR", action: "next" },
+    secondary: { text: "Voltar ao início", action: "home" },
+  },
+  {
+    bg: "IMG-Peixes/img20.jpeg", // já tem
+    kicker: "Nossos parceiros",
+    title: "Procedência que a gente <span style='color:var(--orange)'>confia</span>.",
+    subtitle: "Trabalhamos com fornecedores e parceiros que seguem padrão e responsabilidade para manter o frescor sempre.",
+    blocks: [
+      { strong: "Fornecedores", span: "Parcerias confiáveis e consistentes" },
+      { strong: "Controle", span: "Qualidade do recebimento à entrega" },
+    ],
+    primary: { text: "CONTINUAR", action: "next" },
+    secondary: { text: "Falar no WhatsApp", action: "whats" },
+  },
+  {
+    bg: "IGlogo.avif", // troque ou use imagem escura bonita
+    kicker: "Marketing & Instagram",
+    title: "É no Instagram que a gente <span style='color:var(--orange)'>mostra tudo</span>.",
+    subtitle: "Novidades, bastidores, parcerias e conteúdo. Se você trabalha com marketing e quer somar com a gente, chama no WhatsApp.",
+    media: ["IG1.png","IG2.png","IG3.png","IG4.png","IG5.png","IG6.png"], // troque
+    primary: { text: "IR PARA O INSTAGRAM", action: "ig" },
+    secondary: { text: "CONTINUAR", action: "next" },
+  },
+  {
+    bg: "empresa-bg.jpg", // troque
+    kicker: "Para empresas",
+    title: "Você tem empresa? Vamos <span style='color:var(--orange)'>fechar</span>?",
+    subtitle: "Atendimento rápido e direto. Seja para mercado, restaurante ou revenda: a gente te atende no WhatsApp.",
+    blocks: [
+      { strong: "Atacado", span: "Volume e organização" },
+      { strong: "Varejo", span: "Pedido rápido e prático" },
+    ],
+    primary: { text: "CHAMAR NO WHATSAPP", action: "whats" },
+    secondary: { text: "CONTINUAR", action: "next" },
+  },
+  {
+    bg: "final-bg.jpg", // troque
+    kicker: "Obrigado",
+    title: "Agradecemos! <span style='color:var(--orange)'>Slim Fish</span>.",
+    subtitle: "Clique em continuar para voltar ao início.",
+    primary: { text: "VOLTAR PARA O INÍCIO", action: "home" },
+    secondary: { text: "Rever experiência", action: "restart" },
+  },
+];
+
+const IG_URL = "https://instagram.com/slimfishpescado"; // ajuste
+const WHATS_URL = "https://wa.me/5511997308201";        // ajuste
+const HOME_URL = "Index.html";                       // ajuste
+
+/* =========================
+   UI refs
+========================= */
+const slideBg = document.getElementById("slideBg");
+const slideContent = document.getElementById("slideContent");
+const progressFill = document.getElementById("progressFill");
+const dotsWrap = document.getElementById("dots");
+const transition = document.getElementById("transition");
+
+const intro = document.getElementById("intro");
+const startBtn = document.getElementById("startBtn");
+const curtainL = document.getElementById("curtainL");
+const curtainR = document.getElementById("curtainR");
+const fishWrap = document.getElementById("fishWrap");
+
+/* =========================
+   Progress dots
+========================= */
+function buildDots(){
+  dotsWrap.innerHTML = "";
+  steps.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = "dot" + (i===0 ? " active" : "");
+    dotsWrap.appendChild(d);
+  });
+}
+buildDots();
+
+let idx = 0;
+
+/* =========================
+   Render step
+========================= */
+function setProgress(){
+  const pct = (idx / (steps.length - 1)) * 100;
+  progressFill.style.width = `${pct}%`;
+  [...dotsWrap.children].forEach((d, i) => d.classList.toggle("active", i===idx));
+}
+
+function render(){
+  const s = steps[idx];
+
+  slideBg.style.backgroundImage = `url('${s.bg}')`;
+
+  const kicker = `
+    <div class="kicker enter">✨ <span>${s.kicker}</span> <b>• Slim Fish</b></div>
+  `;
+
+  const title = `<div class="title enter" style="animation-delay:.06s">${s.title}</div>`;
+  const subtitle = `<div class="subtitle enter" style="animation-delay:.12s">${s.subtitle}</div>`;
+
+  let stats = "";
+  if (s.blocks){
+    stats = `
+      <div class="stats enter" style="animation-delay:.18s">
+        ${s.blocks.map(b => `
+          <div class="stat">
+            <strong>${b.strong}</strong>
+            <span>${b.span}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  let media = "";
+  if (s.media){
+    media = `
+      <div class="media enter" style="animation-delay:.18s">
+        ${s.media.map(src => `<img src="${src}" alt="">`).join("")}
+      </div>
+    `;
+  }
+
+  const actions = `
+    <div class="actions enter" style="animation-delay:.24s">
+      <div class="hint">
+        <span class="pill">Dica</span> Use <b>→</b> no teclado ou toque em <b>CONTINUAR</b>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+        ${renderButton(s.secondary, true)}
+        ${renderButton(s.primary, false)}
+      </div>
+    </div>
+  `;
+
+  slideContent.innerHTML = kicker + title + subtitle + (media || stats) + actions;
+  setProgress();
+}
+
+function renderButton(btn, isSecondary){
+  if (!btn) return "";
+  const cls = isSecondary ? "btn ghost" : "btn orange";
+  // para "IR PARA O INSTAGRAM" ficar roxo, troque para btn purple
+  const finalClass = (btn.action === "ig") ? "btn purple" : cls;
+
+  return `<button class="${finalClass}" data-action="${btn.action}">${btn.text}</button>`;
+}
+
+/* =========================
+   Navigation logic
+========================= */
+function wipeThen(fn){
+  transition.classList.remove("on");
+  void transition.offsetWidth; // reflow
+  transition.classList.add("on");
+  setTimeout(fn, 260);
+  setTimeout(() => transition.classList.remove("on"), 650);
+}
+
+function next(){
+  if (idx < steps.length - 1){
+    wipeThen(() => { idx++; render(); });
+  }
+}
+function prev(){
+  if (idx > 0){
+    wipeThen(() => { idx--; render(); });
+  }
+}
+function goHome(){
+  window.location.href = HOME_URL;
+}
+function openIG(){
+  window.open(IG_URL, "_blank");
+}
+function openWhats(){
+  window.open(WHATS_URL, "_blank");
+}
+function restart(){
+  wipeThen(() => { idx = 0; render(); });
+}
+
+/* =========================
+   Click handling
+========================= */
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-action]");
+  if (!btn) return;
+
+  const action = btn.getAttribute("data-action");
+  if (action === "next") next();
+  if (action === "prev") prev();
+  if (action === "home") goHome();
+  if (action === "ig") openIG();
+  if (action === "whats") openWhats();
+  if (action === "restart") restart();
+});
+
+/* =========================
+   Keyboard
+========================= */
+window.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowRight") next();
+  if (e.key === "ArrowLeft") prev();
+  if (e.key === "Escape") goHome();
+});
+
+/* =========================
+   Touch (swipe)
+========================= */
+let touchX = 0;
+window.addEventListener("touchstart", (e) => touchX = e.changedTouches[0].clientX, {passive:true});
+window.addEventListener("touchend", (e) => {
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) < 55) return;
+  if (dx < 0) next(); else prev();
+}, {passive:true});
+
+/* =========================
+   Intro sequence
+========================= */
+startBtn.addEventListener("click", () => {
+  // peixe atravessando
+  fishWrap.style.display = "block";
+
+  // cortina abrindo
+  setTimeout(() => {
+    curtainL.classList.add("open");
+    curtainR.classList.add("open");
+  }, 120);
+
+  // some intro
+  setTimeout(() => {
+    intro.classList.add("hidden");
+    render();
+  }, 980);
+});
+
+/* =========================
+   Inicial
+========================= */
+render(); // prepara primeira etapa (vai ficar atrás da intro)
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <link rel="icon" type="image/png" href="logo.jpg">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cardápio | Slim Fish</title>
+
+<style>
+:root{
+  --primary:#4b0082;
+  --accent:#9d4edd;
+
+  --brand-orange:#E06020;
+  --brand-orange-dark:#C94F17;
+
+  --dark:#0f172a;
+  --light:#f8fafc;
+
+  --glass: rgba(255,255,255,.10);
+  --glass2: rgba(255,255,255,.06);
+  --stroke: rgba(255,255,255,.12);
+
+  --shadow: 0 24px 60px rgba(0,0,0,.40);
+  --shadow2: 0 18px 40px rgba(0,0,0,.22);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI", Arial, sans-serif;}
+body{
+  background:var(--light);
+  color:var(--dark);
+  overflow-x:hidden;
+}
+
+/* =========================================
+   NAV
+========================================= */
+nav{
+  position:fixed;
+  top:0; left:0; right:0;
+  z-index:1000;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 18px;
+  background: rgba(75,0,130,.86);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 26px rgba(0,0,0,.18);
+}
+nav .left, nav .right{display:flex;gap:14px;align-items:center;}
+nav a{
+  color:#fff;
+  text-decoration:none;
+  font-weight:900;
+  letter-spacing:.2px;
+  position:relative;
+  opacity:.95;
+}
+nav a::after{
+  content:"";
+  position:absolute;
+  left:0; bottom:-6px;
+  width:0%;
+  height:2px;
+  background:linear-gradient(90deg, #ffffff, rgba(255,255,255,.4));
+  transition:.28s;
+  border-radius:999px;
+}
+nav a:hover::after{width:100%;}
+nav .pill{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.10);
+}
+nav .pill img{
+  width:28px;height:28px;border-radius:50%;
+  background:#fff;padding:2px;object-fit:cover;
+}
+
+/* =========================================
+   HERO (fundo com imagens passando)
+========================================= */
+header{
+  min-height:100vh;
+  position:relative;
+  overflow:hidden;
+  padding-top:72px; /* por causa do nav */
+  display:flex;
+  align-items:center;
+}
+.bg-marquee{
+  position:absolute;
+  inset:0;
+  display:flex;
+  width:200%;
+  animation:bgSlide 34s linear infinite;
+  filter:saturate(1.05);
+}
+.bg-marquee img{
+  width:25%;
+  object-fit:cover;
+}
+.bg-overlay{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(900px 600px at 15% 10%, rgba(157,78,221,.28), transparent 60%),
+    radial-gradient(900px 600px at 85% 20%, rgba(224,96,32,.20), transparent 60%),
+    linear-gradient(rgba(0,0,0,.62), rgba(0,0,0,.55));
+}
+@keyframes bgSlide{
+  from{ transform:translateX(0); }
+  to{ transform:translateX(-50%); }
+}
+
+/* =========================================
+   CONTEÚDO PRINCIPAL (Cardápio + Mais pedidos)
+========================================= */
+.hero-wrap{
+  position:relative;
+  z-index:2;
+  width:min(1180px, 92vw);
+  margin:0 auto;
+  display:grid;
+  gap:16px;
+}
+
+.hero-head{
+  text-align:left;
+  color:#fff;
+}
+.hero-head h1{
+  font-size:34px;
+  line-height:1.1;
+  font-weight:1000;
+  letter-spacing:.2px;
+}
+.hero-head p{
+  margin-top:10px;
+  max-width:720px;
+  line-height:1.6;
+  color:rgba(255,255,255,.86);
+  font-weight:700;
+  font-size:14px;
+}
+
+/* grid principal */
+.hero-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:16px;
+  align-items:stretch;
+}
+
+/* cards glass */
+.glass{
+  border-radius:26px;
+  background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow: var(--shadow);
+  overflow:hidden;
+}
+
+/* CARDÁPIO PREVIEW */
+.menu-card{
+  padding:16px;
+  display:grid;
+  gap:14px;
+}
+.menu-top{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+}
+.menu-top .title{
+  color:#fff;
+  font-weight:1000;
+  letter-spacing:.2px;
+  font-size:18px;
+}
+.menu-top .hint{
+  color:rgba(255,255,255,.80);
+  font-weight:800;
+  font-size:12px;
+}
+.preview{
+  position:relative;
+  border-radius:20px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.25);
+  box-shadow: var(--shadow2);
+  cursor:pointer;
+  user-select:none;
+}
+.preview img{
+  width:100%;
+  height:360px;
+  object-fit:cover;
+  display:block;
+  transform:scale(1.02);
+  transition: transform .35s ease;
+}
+.preview:hover img{ transform:scale(1.05); }
+
+.preview::after{
+  content:"Clique para abrir e dar zoom";
+  position:absolute;
+  left:14px; bottom:14px;
+  padding:10px 12px;
+  border-radius:999px;
+  background: rgba(0,0,0,.55);
+  border:1px solid rgba(255,255,255,.14);
+  color:#fff;
+  font-weight:1000;
+  font-size:12px;
+  letter-spacing:.2px;
+  backdrop-filter: blur(8px);
+}
+
+/* botões */
+.btn-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:14px 18px;
+  border-radius:999px;
+  text-decoration:none;
+  font-weight:1000;
+  letter-spacing:.2px;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow: 0 16px 40px rgba(0,0,0,.30);
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+  user-select:none;
+  cursor:pointer;
+}
+.btn:hover{ transform: translateY(-2px); box-shadow: 0 18px 44px rgba(0,0,0,.34); }
+.btn:active{ transform: translateY(0) scale(.98); filter:brightness(.95); }
+
+.btn.purple{ background: linear-gradient(135deg, var(--primary), var(--accent)); }
+.btn.orange{ background: linear-gradient(135deg, var(--brand-orange), var(--brand-orange-dark)); }
+.btn.ghost{ background: transparent; }
+
+/* “Mais pedidos” bloco */
+.hot-card{
+  padding:16px;
+  display:grid;
+  gap:12px;
+}
+.hot-card .title{
+  color:#fff;
+  font-weight:1000;
+  letter-spacing:.2px;
+  font-size:18px;
+}
+.hot-card .sub{
+  color:rgba(255,255,255,.82);
+  font-weight:700;
+  font-size:13px;
+  line-height:1.5;
+}
+
+/* =========================================
+   CARROSSEL 3D (Coverflow)
+========================================= */
+.coverflow{
+  position:relative;
+  height:420px;
+  border-radius:22px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.20);
+  box-shadow: var(--shadow2);
+}
+.coverflow-stage{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  perspective: 1000px;
+  overflow:hidden;
+  touch-action: pan-x;
+}
+.coverflow-track{
+  position:relative;
+  width:100%;
+  height:100%;
+}
+.card3d{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:250px;
+  height:330px;
+  transform-style:preserve-3d;
+  border-radius:18px;
+  overflow:hidden;
+  background:#111;
+  box-shadow: 0 22px 50px rgba(0,0,0,.45);
+  border:1px solid rgba(255,255,255,.14);
+  transition: transform .38s ease, filter .38s ease, opacity .38s ease;
+  cursor:pointer;
+  user-select:none;
+}
+.card3d img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  filter:saturate(1.04);
+}
+.card3d .cap{
+  position:absolute;
+  left:12px; right:12px; bottom:12px;
+  padding:10px 12px;
+  border-radius:14px;
+  background: rgba(0,0,0,.55);
+  border:1px solid rgba(255,255,255,.14);
+  color:#fff;
+  font-weight:1000;
+  font-size:13px;
+  letter-spacing:.2px;
+  backdrop-filter: blur(8px);
+}
+
+/* controles */
+.hot-controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.icon-btn{
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.14);
+  color:#fff;
+  font-weight:1000;
+  cursor:pointer;
+  user-select:none;
+  transition:.18s ease;
+}
+.icon-btn:hover{ transform: translateY(-2px); background: rgba(255,255,255,.12); }
+.icon-btn:active{ transform: translateY(0) scale(.98); }
+
+/* =========================================
+   “Mais pedidos” âncora (para nav)
+========================================= */
+#mais-pedidos{
+  scroll-margin-top: 92px;
+}
+
+/* =========================================
+   MODAL ZOOM (imagem do cardápio)
+========================================= */
+.modal{
+  position:fixed;
+  inset:0;
+  background: rgba(0,0,0,.72);
+  z-index:5000;
+  opacity:0;
+  pointer-events:none;
+  transition:.18s ease;
+}
+.modal.open{
+  opacity:1;
+  pointer-events:auto;
+}
+.modal-inner{
+  position:absolute;
+  inset:12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.modal-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+}
+.modal-top .tip{
+  color:rgba(255,255,255,.9);
+  font-weight:900;
+  font-size:12px;
+  letter-spacing:.2px;
+  opacity:.9;
+}
+.modal-close{
+  width:46px;height:46px;border-radius:14px;
+  background: rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.14);
+  color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  user-select:none;
+  font-weight:1000;
+}
+.viewer{
+  flex:1;
+  border-radius:18px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.30);
+  position:relative;
+  touch-action: none;
+}
+.viewer img{
+  position:absolute;
+  top:50%; left:50%;
+  transform: translate(-50%,-50%) scale(1);
+  transform-origin: center center;
+  will-change: transform;
+  user-select:none;
+  -webkit-user-drag:none;
+  max-width:none; /* permite zoom de verdade */
+  width: 1200px; /* “tamanho base” */
+  height:auto;
+}
+.modal-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  align-items:center;
+}
+.zoom-row{
+  display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+}
+.small-note{
+  color:rgba(255,255,255,.80);
+  font-weight:800;
+  font-size:12px;
+  line-height:1.4;
+}
+
+/* =========================================
+   VINHETA “virar página”
+========================================= */
+.vignette{
+  position:fixed;
+  inset:0;
+  z-index:7000;
+  pointer-events:none;
+  background: rgba(0,0,0,.0);
+}
+.vignette.hidden{ display:none; }
+
+.book{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(900px 600px at 20% 20%, rgba(157,78,221,.22), transparent 60%),
+    radial-gradient(900px 600px at 80% 20%, rgba(224,96,32,.18), transparent 60%),
+    linear-gradient(rgba(0,0,0,.82), rgba(0,0,0,.72));
+}
+.book-inner{
+  width:min(880px, 92vw);
+  height:min(520px, 62vh);
+  position:relative;
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow: 0 30px 90px rgba(0,0,0,.65);
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.08);
+  backdrop-filter: blur(12px);
+}
+.book-inner .glow{
+  position:absolute; inset:-60px;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(157,78,221,.35), transparent 55%),
+    radial-gradient(circle at 75% 40%, rgba(224,96,32,.25), transparent 60%);
+  filter: blur(24px);
+  opacity:.9;
+}
+.page{
+  position:absolute;
+  top:0; bottom:0;
+  left:0;
+  width:50%;
+  background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+  border-right:1px solid rgba(255,255,255,.10);
+}
+.page.right{
+  left:50%;
+  border-right:none;
+  border-left:1px solid rgba(255,255,255,.10);
+}
+.page-flip{
+  position:absolute;
+  top:-2px; bottom:-2px;
+  left:50%;
+  width:50%;
+  transform-origin:left center;
+  background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.08));
+  border-left:1px solid rgba(255,255,255,.12);
+  box-shadow: -30px 0 60px rgba(0,0,0,.25);
+  transform: rotateY(0deg);
+  animation: flip 1.05s cubic-bezier(.2,.9,.2,1) forwards;
+}
+@keyframes flip{
+  0%{ transform: rotateY(0deg); filter:brightness(1); }
+  70%{ transform: rotateY(-140deg); filter:brightness(.9); }
+  100%{ transform: rotateY(-180deg); filter:brightness(.85); }
+}
+.book-text{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:18px;
+  z-index:2;
+}
+.book-text h2{
+  color:#fff;
+  font-weight:1000;
+  letter-spacing:.2px;
+  font-size:22px;
+}
+.book-text p{
+  margin-top:8px;
+  color:rgba(255,255,255,.82);
+  font-weight:800;
+  font-size:13px;
+}
+.progress{
+  margin-top:18px;
+  width:min(320px, 80%);
+  height:10px;
+  border-radius:999px;
+  background: rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.14);
+  overflow:hidden;
+}
+.progress span{
+  display:block;
+  height:100%;
+  width:0%;
+  background: linear-gradient(90deg, var(--brand-orange), var(--accent));
+  animation: loadbar 1.05s ease forwards;
+}
+@keyframes loadbar{
+  from{ width:0%; }
+  to{ width:100%; }
+}
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+@media (min-width: 860px){
+  .hero-grid{
+    grid-template-columns: 1.05fr .95fr;
+    gap:18px;
+  }
+  .hero-head h1{ font-size:44px; }
+  .hero-head p{ font-size:15px; }
+  .preview img{ height:420px; }
+  .card3d{ width:270px; height:350px; }
+}
+
+@media (max-width: 520px){
+  nav{ padding:12px 14px; }
+  nav .pill{ padding:8px 10px; }
+  .hero-head h1{ font-size:30px; }
+  .coverflow{ height:390px; }
+  .card3d{ width:220px; height:300px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- VINHETA (abre ao entrar) -->
+<div class="vignette" id="vignette">
+  <div class="book">
+    <div class="book-inner">
+      <div class="glow"></div>
+      <div class="page"></div>
+      <div class="page right"></div>
+      <div class="page-flip"></div>
+
+      <div class="book-text">
+        <h2>Cardápio Slim Fish</h2>
+        <p>Abrindo o menu...</p>
+        <div class="progress"><span></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav>
+  <div class="left">
+    <a class="pill" href="Index.html">
+      ← Voltar
+    </a>
+  </div>
+
+  <div class="right">
+    <a href="#mais-pedidos">Mais pedidos</a>
+    <a class="pill" href="Cardapio.pdf" target="_blank" rel="noopener">📄 Ver PDF</a>
+  </div>
+</nav>
+
+<header>
+  <!-- FUNDO ANIMADO -->
+  <div class="bg-marquee" aria-hidden="true">
+    <img src="IMG-Peixes/IMG1.jpeg" alt="">
+    <img src="IMG-Peixes/img22.jpeg" alt="">
+    <img src="IMG-Peixes/img30.jpeg" alt="">
+    <img src="IMG-Peixes/IMG4.jpeg" alt="">
+    <!-- duplicado -->
+    <img src="IMG-Peixes/IMG1.jpeg" alt="">
+    <img src="IMG-Peixes/img22.jpeg" alt="">
+    <img src="IMG-Peixes/img30.jpeg" alt="">
+    <img src="IMG-Peixes/IMG4.jpeg" alt="">
+  </div>
+  <div class="bg-overlay" aria-hidden="true"></div>
+
+  <div class="hero-wrap">
+    <div class="hero-head">
+      <h1>Conheça nosso cardápio</h1>
+      <p>
+        Clique na imagem para abrir em tela cheia e dar zoom.
+        Logo ao lado você já vê os <strong>Mais pedidos</strong> em um carrossel 3D.
+      </p>
+    </div>
+
+    <div class="hero-grid">
+      <!-- CARDÁPIO -->
+      <div class="glass menu-card" id="menuCard">
+        <div class="menu-top">
+          <div class="title">📘 Cardápio (imagem)</div>
+          <div class="hint">Toque/role para zoom • Arraste para mover</div>
+        </div>
+
+        <!-- ✅ Troque Cardapio.jpg pelo nome real da sua imagem -->
+        <div class="preview" id="openViewer" title="Clique para abrir">
+          <img src="Cardapio.jpg" alt="Cardápio Slim Fish">
+        </div>
+
+        <div class="btn-row">
+          <a class="btn purple" href="Cardapio.pdf" target="_blank" rel="noopener">📄 Ver cardápio (PDF)</a>
+          <a class="btn orange" href="Cardapio.pdf" download>⬇ Baixar PDF</a>
+          <a class="btn ghost" href="#mais-pedidos">Ver mais pedidos</a>
+        </div>
+      </div>
+
+      <!-- MAIS PEDIDOS 3D -->
+      <div class="glass hot-card" id="mais-pedidos">
+        <div class="title">🔥 Mais pedidos</div>
+        <div class="sub">Arraste pro lado.</div>
+
+        <div class="coverflow" id="coverflow">
+          <div class="coverflow-stage" id="stage">
+            <div class="coverflow-track" id="track">
+              <!-- ✅ edite os itens aqui (img + nome) -->
+              <div class="card3d" data-name="Tilápia">
+                <img src="IMG_BANDEJAS/Lombo de Salmão.jpeg" alt="Tilápia">
+                <div class="cap">Lombo de Salmão</div>
+              </div>
+              <div class="card3d" data-name="Salmão">
+                <img src="IMG_BANDEJAS/FILÉ TILAPIA ST PETER.jpeg" alt="Salmão">
+                <div class="cap">Filé de Tilápia ST PETER</div>
+              </div>
+              <div class="card3d" data-name="Camarão">
+                <img src="IMG_BANDEJAS/File de pescada fresca.jpeg" alt="Camarão">
+                <div class="cap">File de pescada fresca</div>
+              </div>
+              <div class="card3d" data-name="Atum">
+                <img src="IMG_BANDEJAS/Camarão cinza.jpeg" alt="Atum">
+                <div class="cap">Camarão cinza</div>
+              </div>
+              <!-- pode adicionar mais -->
+            </div>
+          </div>
+        </div>
+
+        <div class="hot-controls">
+          <div class="icon-btn" id="prevBtn" aria-label="Anterior">←</div>
+          <div class="icon-btn" id="nextBtn" aria-label="Próximo">→</div>
+          <a class="btn orange" style="padding:12px 16px;" href="Pedido.html">Simular pedido</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MODAL (zoom do cardápio) -->
+<div class="modal" id="modal">
+  <div class="modal-inner">
+    <div class="modal-top">
+      <div class="tip">Dica: pinça para zoom (mobile) • scroll para zoom (desktop) • arraste para mover</div>
+      <div class="modal-close" id="closeModal">✕</div>
+    </div>
+
+    <div class="viewer" id="viewer">
+      <img id="viewerImg" src="Cardapio.jpg" alt="Cardápio ampliado">
+    </div>
+
+    <div class="modal-actions">
+      <div class="zoom-row">
+        <div class="icon-btn" id="zoomOut" title="Zoom -">−</div>
+        <div class="icon-btn" id="zoomReset" title="Reset">⟲</div>
+        <div class="icon-btn" id="zoomIn" title="Zoom +">+</div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+        <a class="btn purple" href="Cardapio.pdf" target="_blank" rel="noopener">📄 Ver PDF</a>
+        <a class="btn orange" href="Cardapio.pdf" download>⬇ Baixar PDF</a>
+      </div>
+    </div>
+
+    <div class="small-note">
+      *No iPhone, às vezes o zoom fica melhor se você abrir e dar 2 toques para resetar.
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================
+   VINHETA (virar página)
+========================== */
+(() => {
+  const v = document.getElementById("vignette");
+  // tempo casando com a animação (1.05s) + um respiro
+  setTimeout(() => {
+    v.classList.add("hidden");
+  }, 1350);
+})();
+
+/* ==========================
+   MODAL + ZOOM + DRAG + PINCH
+========================== */
+const modal = document.getElementById("modal");
+const openViewer = document.getElementById("openViewer");
+const closeModal = document.getElementById("closeModal");
+const viewer = document.getElementById("viewer");
+const img = document.getElementById("viewerImg");
+
+const zoomIn = document.getElementById("zoomIn");
+const zoomOut = document.getElementById("zoomOut");
+const zoomReset = document.getElementById("zoomReset");
+
+let scale = 1;
+let minScale = 1;
+let maxScale = 4;
+
+let pos = { x: 0, y: 0 };
+let dragging = false;
+let last = { x: 0, y: 0 };
+
+/* pinch */
+let pointers = new Map();
+let lastDist = 0;
+
+function applyTransform(){
+  img.style.transform = `translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px)) scale(${scale})`;
+}
+
+function openModal(){
+  modal.classList.add("open");
+  document.body.style.overflow = "hidden";
+  resetView();
+}
+function closeModalFn(){
+  modal.classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+function resetView(){
+  scale = 1;
+  pos = { x: 0, y: 0 };
+  applyTransform();
+}
+
+function zoomBy(delta, originClient){
+  const prev = scale;
+  scale = clamp(scale + delta, minScale, maxScale);
+
+  // ajuste simples para não “pular” tanto (mantém feeling bom)
+  const factor = scale / prev;
+  pos.x *= factor;
+  pos.y *= factor;
+
+  applyTransform();
+}
+
+openViewer.addEventListener("click", openModal);
+closeModal.addEventListener("click", closeModalFn);
+modal.addEventListener("click", (e) => { if(e.target === modal) closeModalFn(); });
+
+zoomIn.addEventListener("click", () => zoomBy(0.25));
+zoomOut.addEventListener("click", () => zoomBy(-0.25));
+zoomReset.addEventListener("click", resetView);
+
+/* wheel zoom (desktop) */
+viewer.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const delta = (e.deltaY > 0) ? -0.18 : 0.18;
+  zoomBy(delta);
+}, { passive:false });
+
+/* pointer events: drag + pinch */
+viewer.addEventListener("pointerdown", (e) => {
+  viewer.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+  if(pointers.size === 1){
+    dragging = true;
+    last.x = e.clientX;
+    last.y = e.clientY;
+  }
+
+  if(pointers.size === 2){
+    dragging = false;
+    const pts = Array.from(pointers.values());
+    lastDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+  }
+});
+
+viewer.addEventListener("pointermove", (e) => {
+  if(!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+  if(pointers.size === 1 && dragging){
+    const dx = e.clientX - last.x;
+    const dy = e.clientY - last.y;
+    last.x = e.clientX;
+    last.y = e.clientY;
+
+    pos.x += dx;
+    pos.y += dy;
+    applyTransform();
+  }
+
+  if(pointers.size === 2){
+    const pts = Array.from(pointers.values());
+    const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+    if(!lastDist) lastDist = dist;
+
+    const diff = dist - lastDist;
+    lastDist = dist;
+
+    // sensibilidade do pinch
+    const delta = diff / 220;
+    scale = clamp(scale + delta, minScale, maxScale);
+    applyTransform();
+  }
+});
+
+function endPointer(e){
+  pointers.delete(e.pointerId);
+  if(pointers.size === 0){
+    dragging = false;
+    lastDist = 0;
+  }
+  if(pointers.size === 1){
+    dragging = true;
+    const pts = Array.from(pointers.values())[0];
+    last.x = pts.x; last.y = pts.y;
+    lastDist = 0;
+  }
+}
+
+viewer.addEventListener("pointerup", endPointer);
+viewer.addEventListener("pointercancel", endPointer);
+viewer.addEventListener("pointerleave", endPointer);
+
+/* double click / double tap = reset */
+let lastTap = 0;
+viewer.addEventListener("click", () => {
+  const now = Date.now();
+  if(now - lastTap < 280){
+    resetView();
+  }
+  lastTap = now;
+});
+
+/* ==========================
+   CARROSSEL 3D (Coverflow)
+========================== */
+const cards = Array.from(document.querySelectorAll(".card3d"));
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const stage = document.getElementById("stage");
+
+let active = 0;
+
+function renderCoverflow(){
+  const spread = 280;       // distância entre cards
+  const rotate = 42;        // rotação
+  const depth = 220;        // “pra frente”
+  const fade = 0.35;
+
+  cards.forEach((c, i) => {
+    const offset = i - active;
+    const abs = Math.abs(offset);
+
+    // posição base
+    const x = offset * spread;
+    const y = 0;
+
+    // empurra o do meio pra frente
+    const z = (offset === 0) ? depth : (depth - abs * 120);
+
+    // rotação
+    const rY = (offset === 0) ? 0 : (offset > 0 ? -rotate : rotate);
+
+    // escala e opacidade
+    const s = (offset === 0) ? 1.06 : (1 - abs * 0.08);
+    const op = (abs >= 3) ? 0 : (1 - abs * fade);
+
+    c.style.opacity = op;
+    c.style.filter = (offset === 0) ? "brightness(1.05)" : "brightness(.92) blur(0px)";
+    c.style.transform = `
+      translate(-50%, -50%)
+      translateX(${x}px)
+      translateY(${y}px)
+      translateZ(${z}px)
+      rotateY(${rY}deg)
+      scale(${s})
+    `;
+    c.style.zIndex = String(100 - abs);
+  });
+}
+
+function prev(){
+  active = (active - 1 + cards.length) % cards.length;
+  renderCoverflow();
+}
+function next(){
+  active = (active + 1) % cards.length;
+  renderCoverflow();
+}
+
+prevBtn.addEventListener("click", prev);
+nextBtn.addEventListener("click", next);
+
+cards.forEach((c, idx) => {
+  c.addEventListener("click", () => {
+    active = idx;
+    renderCoverflow();
+    // (opcional) ao clicar no card central, abre o zoom do cardápio:
+    // if(idx === active) openModal();
+  });
+});
+
+/* drag swipe */
+let down = false;
+let sx = 0;
+let moved = 0;
+
+stage.addEventListener("pointerdown", (e) => {
+  down = true;
+  sx = e.clientX;
+  moved = 0;
+  stage.setPointerCapture(e.pointerId);
+});
+
+stage.addEventListener("pointermove", (e) => {
+  if(!down) return;
+  moved = e.clientX - sx;
+});
+
+stage.addEventListener("pointerup", () => {
+  if(!down) return;
+  down = false;
+
+  if(Math.abs(moved) > 40){
+    (moved > 0) ? prev() : next();
+  }
+});
+
+renderCoverflow();
+
+/* autoplay suave (bem clean) */
+let auto = setInterval(next, 3200);
+stage.addEventListener("mouseenter", () => clearInterval(auto));
+stage.addEventListener("mouseleave", () => auto = setInterval(next, 3200));
+stage.addEventListener("touchstart", () => clearInterval(auto), {passive:true});
+stage.addEventListener("touchend", () => auto = setInterval(next, 3200), {passive:true});
+</script>
+
+</body>
+</html>
