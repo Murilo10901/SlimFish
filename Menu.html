@@ -1312,6 +1312,10 @@
         gap:9px;
       }
 
+      body.no-scroll {
+      overflow: hidden;
+    }
+
       .pill{
         font-size:11px;
         padding:6px 9px;
@@ -1468,11 +1472,12 @@
         <span id="shippingLine">R$ 15,00</span>
       </div>
 
-      <div class="summary-line total">
+   <div class="summary-line total">
         <span>Total aproximado</span>
         <span id="totalLine">R$ 0,00</span>
       </div>
 
+      <button class="btn purple" id="continueShoppingBtn" style="width:100%;">Continuar comprando</button>
       <button class="btn orange" id="checkoutBtn" style="width:100%;">Finalizar no WhatsApp</button>
 
       <div class="footer-note">
@@ -1620,10 +1625,10 @@
     <div class="checkout-body" style="align-items: center; padding-top:0;">
       <img src="logo.jpg" alt="Sacola Térmica" style="width: 140px; height: 140px; border-radius: 16px; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
       <p style="margin-top: 14px; color: var(--muted); font-size: 14px; line-height: 1.6;">
-        Deseja adicionar uma Sacola Térmica exclusiva ao seu pedido por apenas <strong>R$ 8,00</strong>? Ela garante que seus produtos cheguem na temperatura perfeita!
+        Deseja adicionar uma Sacola Térmica exclusiva ao seu pedido por apenas <strong>R$ 8,50</strong>? Ela garante que seus produtos cheguem na temperatura perfeita!
       </p>
       <div style="display:flex; flex-direction: column; gap:10px; margin-top: 18px; width: 100%;">
-        <button class="btn green" id="upsellYesBtn" style="width: 100%;">Sim, adicionar por R$ 8,00</button>
+        <button class="btn green" id="upsellYesBtn" style="width: 100%;">Sim, adicionar por R$ 8,50</button>
         <button class="btn ghost" id="upsellNoBtn" style="width: 100%;">Não, obrigado</button>
       </div>
     </div>
@@ -1757,7 +1762,7 @@
         title:"Sacolinha SF",
         desc:"Nossa sacola térmica exclusiva para manter a qualidade e temperatura dos seus produtos.",
         items:[
-          { code:99, id:"sacola-termica-sf", name:"Sacola Térmica Slim Fish", desc:"Ideal para manter a temperatura. Bonita e reutilizável.", img:"IMG_BANDEJAS/sacolinha.jpg", details:["1 unidade"], variants:[{label:"1 unidade", price:8.00}] }
+          { code:99, id:"sacola-termica-sf", name:"Sacola Térmica Slim Fish", desc:"Ideal para manter a temperatura. Bonita e reutilizável.", img:"IMG_BANDEJAS/sacolinha.jpg", details:["1 unidade"], variants:[{label:"1 unidade", price:8.50}] }
         ]
       }
     ];
@@ -1791,6 +1796,7 @@
     const closeCartBtn = document.getElementById("closeCartBtn");
     const checkoutBtn = document.getElementById("checkoutBtn");
     const heroFinishBtn = document.getElementById("heroFinishBtn");
+    const continueShoppingBtn = document.getElementById("continueShoppingBtn");
 
     const modalBackdrop = document.getElementById("modalBackdrop");
     const checkoutModal = document.getElementById("checkoutModal");
@@ -2164,15 +2170,17 @@
       });
     }
 
-    function openCart(){
+  function openCart(){
       drawer.classList.add("open");
       backdrop.classList.add("open");
+      document.body.classList.add("no-scroll"); // Trava o fundo
       renderCart();
     }
 
     function closeCart(){
       drawer.classList.remove("open");
       backdrop.classList.remove("open");
+      document.body.classList.remove("no-scroll"); // Destrava o fundo
     }
 
     function openCheckoutModal(){
@@ -2194,6 +2202,7 @@
     openCartBtn.addEventListener("click", openCart);
     closeCartBtn.addEventListener("click", closeCart);
     backdrop.addEventListener("click", closeCart);
+    continueShoppingBtn.addEventListener("click", closeCart);
 
     checkoutBtn.addEventListener("click", openCheckoutModal);
     heroFinishBtn.addEventListener("click", openCheckoutModal);
@@ -2540,7 +2549,7 @@
       }
 
       lines.push("");
-      lines.push("⚠️ Sei que o valor final pode mudar por conta da pesagem, contagem e confirmação do frete.");
+      lines.push("⚠️ Sei que o valor final pode mudar por conta da pesagem e disponibilidade do produto.");
       lines.push("Pode confirmar disponibilidade, entrega e valor final? 😊");
 
       return lines.join("\n");
