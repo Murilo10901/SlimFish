@@ -923,7 +923,7 @@
       line-height:1.5;
     }
 
-    .toast{
+.toast{
       position:fixed;
       left:50%;
       bottom:86px;
@@ -935,6 +935,7 @@
       border:1px solid rgba(255,255,255,.18);
       box-shadow:0 20px 50px rgba(0,0,0,.45);
       opacity:0;
+      pointer-events:none; /* ADICIONE ESTA LINHA AQUI */
       transition:.22s ease;
       z-index:130;
       font-weight:1000;
