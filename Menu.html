@@ -387,13 +387,18 @@
       color:rgba(255,255,255,.58);
     }
 
-    .tabs{
-      display:flex;
-      gap:10px;
-      overflow:auto;
-      padding-bottom:4px;
-      scrollbar-width:none;
-    }
+.tabs{
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  white-space:nowrap;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:4px;
+}
+
+.tabs::-webkit-scrollbar{
+  display:none;
+}
 
     .tabs::-webkit-scrollbar{ display:none; }
 
@@ -986,6 +991,21 @@
       transform:translate(-50%, -50%) scale(1);
     }
 
+    .tabs-wrap {
+  position: relative;
+}
+
+.tabs-wrap::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 36px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(to left, rgba(11,7,17,1), rgba(11,7,17,0));
+}
+
     .checkout-head{
       padding:16px;
       border-bottom:1px solid rgba(255,255,255,.10);
@@ -1246,6 +1266,35 @@
       transform:translate(-50%, -50%) scale(1);
     }
 
+
+    .tabs-hint {
+  font-size: 12px;
+  color: rgba(255,255,255,.78);
+  margin: 8px 4px 10px;
+}
+
+
+.tabs-hint {
+  display: none;
+  font-size: 12px;
+  color: rgba(255,255,255,.78);
+  margin: 8px 4px 10px;
+}
+
+@media (max-width: 768px) {
+  .tabs {
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    overflow:visible;
+    white-space:normal;
+  }
+
+  .tab {
+    flex:0 0 auto;
+  }
+}
+
     .upsell-backdrop {
       position:fixed;
       inset:0;
@@ -1417,7 +1466,7 @@
         <div class="conditions-card">
           <strong>Condomínios e observações</strong>
           <p>
-            Condições especiais para condomínios podem ser consultadas no atendimento. O cliente também poderá informar referência, complemento e forma de pagamento na etapa final.
+            Condições especiais para condomínios podem ser consultadas com o atendimento. O cliente também poderá informar referência, complemento e forma de pagamento na etapa final.
           </p>
         </div>
       </aside>
@@ -1430,11 +1479,17 @@
       </div>
 
       <div class="tools">
-        <div class="search">
-          <input id="searchInput" placeholder="Buscar no cardápio (ex: salmão, camarão, sashimi, empada...)">
-        </div>
-        <div class="tabs" id="tabs"></div>
-      </div>
+ <div class="tools">
+  <div class="search">
+    <input id="searchInput" placeholder="Buscar no cardápio (ex: salmão, camarão, sashimi, empada...)">
+  </div>
+
+  <div class="tabs-hint">Arraste para o lado para ver mais categorias →</div>
+
+  <div class="tabs-wrap">
+    <div class="tabs" id="tabs"></div>
+  </div>
+</div>
 
       <div class="section-title" id="categoryTitle" style="margin-top:18px;">Carregando...</div>
       <div class="section-sub" id="categoryDesc">Veja os itens desta categoria.</div>
@@ -1576,7 +1631,7 @@
 
         <div class="field" style="margin-top:12px;">
           <label for="customerObs">Observação geral (opcional)</label>
-          <textarea class="textarea" id="customerObs" placeholder="Ex:Tocar interfone, etc."></textarea>
+          <textarea class="textarea" id="customerObs" placeholder="Ex: telefone, etc."></textarea>
         </div>
       </div>
 
@@ -1626,7 +1681,7 @@
     <div class="checkout-body" style="align-items: center; padding-top:0;">
       <img src="logo.jpg" alt="Sacola Térmica" style="width: 140px; height: 140px; border-radius: 16px; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
       <p style="margin-top: 14px; color: var(--muted); font-size: 14px; line-height: 1.6;">
-        Deseja adicionar uma Sacola Térmica exclusiva ao seu pedido por apenas <strong>R$ 8,50</strong>? Ela garante que seus produtos cheguem na temperatura perfeita!
+        Deseja adicionar uma sacola térmica exclusiva ao seu pedido por apenas <strong>R$ 8,50</strong>? Ela garante que seus produtos cheguem na temperatura perfeita!
       </p>
       <div style="display:flex; flex-direction: column; gap:10px; margin-top: 18px; width: 100%;">
         <button class="btn green" id="upsellYesBtn" style="width: 100%;">Sim, adicionar por R$ 8,50</button>
@@ -1760,10 +1815,11 @@
       },
       {
         id:"sacolinha-sf",
-        title:"Sacolinha SF",
+        title:"embalagens",
         desc:"Nossa sacola térmica exclusiva para manter a qualidade e temperatura dos seus produtos.",
         items:[
-          { code:99, id:"sacola-termica-sf", name:"Sacola Térmica Slim Fish", desc:"Ideal para manter a temperatura. Bonita e reutilizável.", img:"IMG_BANDEJAS/sacolinha.jpg", details:["1 unidade"], variants:[{label:"1 unidade", price:8.50}] }
+          { code:99, id:"sacola-termica-sf", name:"Sacola Térmica Slim Fish", desc:"Ideal para manter a temperatura. Bonita e reutilizável.", img:"IMG_BANDEJAS/sacolinha.jpg", details:["1 unidade"], variants:[{label:"1 unidade", price:8.50}] },
+           { code:100, id:"Isopor-com-gelo", name:"Isopor com Gelo", desc:"Ideal para manter a temperatura.", img:"IMG_BANDEJAS/Isopor_gelo.jpg", details:["1 unidade"], variants:[{label:"1 unidade", price:18.00}] }
         ]
       }
     ];
