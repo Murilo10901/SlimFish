@@ -1576,7 +1576,7 @@
 
         <div class="field" style="margin-top:12px;">
           <label for="customerObs">Observação geral (opcional)</label>
-          <textarea class="textarea" id="customerObs" placeholder="Ex: entregar no período da tarde, tocar interfone, etc."></textarea>
+          <textarea class="textarea" id="customerObs" placeholder="Ex:Tocar interfone, etc."></textarea>
         </div>
       </div>
 
@@ -1658,10 +1658,10 @@
       {
         id:"na-bandeja",
         title:"Na Bandeja",
-        desc:"Itens prontos em bandeja, com peso fechado ou opção por kg em alguns casos.",
+        desc:"Itens prontos em bandeja com peso fechado.",
         items:[
           { code:1, id:"salmao-premium-lombo", name:"Filé de Salmão Premium Lombo", desc:"Corte nobre na bandeja.", img:"IMG_BANDEJAS/Lombo de Salmão.jpeg", details:["400g", "Na bandeja"], variants:[{label:"400g", price:56.00}] },
-          { code:2, id:"salmao-premium-cauda", name:"Filé de Salmão Premium Cauda", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/salmao premium calda.jpeg", details:["400g", "Na bandeja"], variants:[{label:"400g", price:48.00}] },
+          { code:2, id:"salmao-premium-cauda", name:"Filé de Salmão Premium Cauda", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/cauda_salmao.jpg", details:["400g", "Na bandeja"], variants:[{label:"400g", price:48.00}] },
           { code:3, id:"tilapia-st-peter-bandeja", name:"Filé de Tilápia St. Peter", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/FILÉ TILAPIA ST PETER.jpeg", details:["400g", "Na bandeja"], variants:[{label:"400g", price:32.00}] },
           { code:4, id:"pescada-branca-bandeja", name:"Filé de Pescada Branca", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/File de pescada fresca.jpeg", details:["400g", "Na bandeja"], variants:[{label:"400g", price:30.00}] },
           { code:5, id:"sardinha-bandeja", name:"Filé de Sardinha", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/filé de sardinha.jpeg", details:["400g", "Na bandeja"], variants:[{label:"400g", price:18.00}] },
@@ -1753,9 +1753,9 @@
         desc:"Produtos práticos para aquecer ou fritar.",
         items:[
           { code:50, id:"empada-camarao", name:"Empada de Camarão", desc:"Só aquecer.", img:"IMG-Peixes/empada de camarão.jpg", details:["6 unidades", "250g"], variants:[{label:"6 unidades • 250g", price:30.00}] },
-          { code:51, id:"coxinha-camarao", name:"Coxinha de Camarão", desc:"Produto pronto.", img:"IMG-Peixes/coxinha de camarão.jpg", details:["10 unidades", "350g"], variants:[{label:"10 unidades • 350g", price:28.00}] },
-          { code:52, id:"bolinho-st-peter", name:"Bolinhos de St. Peter", desc:"Produto pronto.", img:"IMG-Peixes/bolinho st peter.jpg", details:["20 unidades", "350g"], variants:[{label:"20 unidades • 350g", price:22.00}] },
-          { code:53, id:"croquete-salmao", name:"Croquete de Salmão", desc:"Para fritar.", img:"IMG-Peixes/croquete de salmão.jpg", details:["20 unidades", "350g"], variants:[{label:"20 unidades • 350g", price:24.00}] }
+          { code:51, id:"coxinha-camarao", name:"Coxinha de Camarão", desc:"Produto pronto.", img:"IMG-Peixes/coxinha de camarão.jpg", details:["10 unidades", "320g"], variants:[{label:"10 unidades • 350g", price:28.00}] },
+          { code:52, id:"bolinho-st-peter", name:"Bolinhos de St. Peter", desc:"Produto pronto.", img:"IMG-Peixes/bolinho st peter.jpg", details:["20 unidades", "320g"], variants:[{label:"20 unidades • 350g", price:22.00}] },
+          { code:53, id:"croquete-salmao", name:"Croquete de Salmão", desc:"Para fritar.", img:"IMG-Peixes/croquete de salmão.jpg", details:["20 unidades", "320g"], variants:[{label:"20 unidades • 350g", price:24.00}] }
         ]
       },
       {
@@ -1846,6 +1846,107 @@
       return v.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
     }
 
+function saveCartState() {
+  const data = {
+    cart: cart,
+    customerName: customerName.value,
+    customerCep: customerCep.value,
+    customerStreet: customerStreet.value,
+    customerNumber: customerNumber.value,
+    customerDistrict: customerDistrict.value,
+    customerCity: customerCity.value,
+    customerComplement: customerComplement.value,
+    paymentMethod: paymentMethod.value,
+    customerObs: customerObs.value,
+    routeInfo: routeInfo,
+    cepValidated: cepValidated,
+    forcedContinue: forcedContinue,
+    declinedUpsellBag: declinedUpsellBag,
+    activeCategory: activeCategory
+  };
+
+  localStorage.setItem("slimfish_cart_state", JSON.stringify(data));
+}
+
+function loadCartState() {
+  const raw = localStorage.getItem("slimfish_cart_state");
+  if (!raw) return;
+
+  try {
+    const data = JSON.parse(raw);
+
+    cart = Array.isArray(data.cart) ? data.cart : [];
+
+    customerName.value = data.customerName || "";
+    customerCep.value = data.customerCep || "";
+    customerStreet.value = data.customerStreet || "";
+    customerNumber.value = data.customerNumber || "";
+    customerDistrict.value = data.customerDistrict || "";
+    customerCity.value = data.customerCity || "";
+    customerComplement.value = data.customerComplement || "";
+    paymentMethod.value = data.paymentMethod || "";
+    customerObs.value = data.customerObs || "";
+
+    routeInfo = data.routeInfo || null;
+    cepValidated = !!data.cepValidated;
+    forcedContinue = !!data.forcedContinue;
+    declinedUpsellBag = !!data.declinedUpsellBag;
+    activeCategory = data.activeCategory || MENU[0].id;
+  } catch (e) {
+    console.error("Erro ao carregar carrinho salvo:", e);
+  }
+}
+
+function clearCartState() {
+  localStorage.removeItem("slimfish_cart_state");
+}
+
+function getSubtotalOnly() {
+  return cart.reduce((sum, item) => {
+    const effectivePrice = getDynamicUnitPrice(item.itemId, item.qty, item.baseUnitPrice);
+    return sum + (effectivePrice * item.qty);
+  }, 0);
+}
+
+function showMinOrderMessage() {
+  const subtotal = getSubtotalOnly();
+  const faltam = MIN_ORDER - subtotal;
+
+  cepResult.className = "checkout-result danger show";
+  cepResult.innerHTML = `
+    <strong>Pedido mínimo não atingido</strong>
+    <p>
+      O pedido mínimo é de <strong>${money(MIN_ORDER)}</strong>.<br>
+      Ainda faltam <strong>${money(faltam)}</strong> para poder enviar sua prévia.
+    </p>
+  `;
+}
+
+function clearMinOrderMessage() {
+  cepResult.className = "checkout-result";
+  cepResult.innerHTML = "";
+}
+function validateMinOrder(showMessage = true) {
+  const subtotal = getSubtotalOnly();
+
+  if (subtotal < MIN_ORDER) {
+    const faltam = MIN_ORDER - subtotal;
+
+    if (showMessage) {
+      alert(
+        `Pedido mínimo de ${money(MIN_ORDER)}.\n` +
+        `Ainda faltam ${money(faltam)} para poder enviar sua prévia.`
+      );
+    }
+
+    return false;
+  }
+
+  clearMinOrderMessage();
+  return true;
+}
+
+
     function formatCep(value){
       const digits = (value || "").replace(/\D/g, "").slice(0, 8);
       if(digits.length <= 5) return digits;
@@ -1881,6 +1982,52 @@
       }
       return item.variants?.[0]?.label || "";
     }
+function getSubtotalOnly() {
+  return cart.reduce((sum, item) => {
+    const effectivePrice = getDynamicUnitPrice(item.itemId, item.qty, item.baseUnitPrice || item.price);
+    return sum + (effectivePrice * item.qty);
+  }, 0);
+}
+function showMinOrderMessage() {
+  const subtotal = getSubtotalOnly();
+  const faltam = MIN_ORDER - subtotal;
+
+  cepResult.className = "checkout-result danger show";
+  cepResult.innerHTML = `
+    <strong>Pedido mínimo não atingido</strong>
+    <p>
+      O pedido mínimo é de <strong>${money(MIN_ORDER)}</strong>.<br>
+      Ainda faltam <strong>${money(faltam)}</strong> para poder enviar sua prévia.
+    </p>
+  `;
+}
+
+function clearMinOrderMessage() {
+  cepResult.className = "checkout-result";
+  cepResult.innerHTML = "";
+}
+
+function validateMinOrder(showMessage = true) {
+  const subtotal = getSubtotalOnly();
+
+  if (subtotal < MIN_ORDER) {
+    const faltam = MIN_ORDER - subtotal;
+
+    if (showMessage) {
+      showMinOrderMessage();
+
+      alert(
+        `Pedido mínimo de ${money(MIN_ORDER)}.\n` +
+        `Ainda faltam ${money(faltam)} para poder enviar sua prévia.`
+      );
+    }
+
+    return false;
+  }
+
+  clearMinOrderMessage();
+  return true;
+}
 
     customerCep.addEventListener("input", (e) => {
       e.target.value = formatCep(e.target.value);
@@ -2095,9 +2242,10 @@
       }
 
       updateBag();
-      renderCart();
-      updateCheckoutSummary();
-      openCart();
+renderCart();
+updateCheckoutSummary();
+saveCartState();
+openCart();
     }
 
     function renderCart(){
@@ -2147,27 +2295,31 @@
         cartBody.appendChild(el);
 
         el.querySelector(`[data-inc="${index}"]`).onclick = () => {
-          item.qty += 1;
-          updateBag();
-          renderCart();
-        };
+  item.qty += 1;
+  updateBag();
+  renderCart();
+  saveCartState();
+};
 
-        el.querySelector(`[data-dec="${index}"]`).onclick = () => {
-          item.qty -= 1;
-          if(item.qty <= 0) cart.splice(index, 1);
-          updateBag();
-          renderCart();
-        };
+el.querySelector(`[data-dec="${index}"]`).onclick = () => {
+  item.qty -= 1;
+  if(item.qty <= 0) cart.splice(index, 1);
+  updateBag();
+  renderCart();
+  saveCartState();
+};
 
-        el.querySelector(`[data-remove="${index}"]`).onclick = () => {
-          cart.splice(index, 1);
-          updateBag();
-          renderCart();
-        };
+el.querySelector(`[data-remove="${index}"]`).onclick = () => {
+  cart.splice(index, 1);
+  updateBag();
+  renderCart();
+  saveCartState();
+};
 
-        el.querySelector(`[data-note="${index}"]`).addEventListener("input", (e) => {
-          item.note = e.target.value;
-        });
+el.querySelector(`[data-note="${index}"]`).addEventListener("input", (e) => {
+  item.note = e.target.value;
+  saveCartState();
+});
       });
     }
 
@@ -2205,8 +2357,21 @@
     backdrop.addEventListener("click", closeCart);
     continueShoppingBtn.addEventListener("click", closeCart);
 
-    checkoutBtn.addEventListener("click", openCheckoutModal);
-    heroFinishBtn.addEventListener("click", openCheckoutModal);
+    checkoutBtn.addEventListener("click", () => {
+  if (!validateMinOrder(true)) {
+    openCart();
+    return;
+  }
+  openCheckoutModal();
+});
+
+heroFinishBtn.addEventListener("click", () => {
+  if (!validateMinOrder(true)) {
+    openCart();
+    return;
+  }
+  openCheckoutModal();
+});
 
     closeModalBtn.addEventListener("click", closeCheckoutModal);
     modalBackdrop.addEventListener("click", closeCheckoutModal);
@@ -2557,43 +2722,45 @@
     }
 
     function resetAll(){
-      customerName.value = "";
-      customerCep.value = "";
-      customerStreet.value = "";
-      customerNumber.value = "";
-      customerDistrict.value = "";
-      customerCity.value = "";
-      customerComplement.value = "";
-      paymentMethod.value = "";
-      customerObs.value = "";
+  customerName.value = "";
+  customerCep.value = "";
+  customerStreet.value = "";
+  customerNumber.value = "";
+  customerDistrict.value = "";
+  customerCity.value = "";
+  customerComplement.value = "";
+  paymentMethod.value = "";
+  customerObs.value = "";
 
-      cart = [];
-      routeInfo = null;
-      cepValidated = false;
-      forcedContinue = false;
-      declinedUpsellBag = false;
+  cart = [];
+  routeInfo = null;
+  cepValidated = false;
+  forcedContinue = false;
+  declinedUpsellBag = false;
 
-      continueAnywayBtn.style.display = "none";
-      cepResult.className = "checkout-result";
-      cepResult.innerHTML = "";
+  clearCartState();
 
-      searchInput.value = "";
-      activeCategory = MENU[0].id;
+  continueAnywayBtn.style.display = "none";
+  cepResult.className = "checkout-result";
+  cepResult.innerHTML = "";
 
-      localStorage.removeItem("slimfish_selected_item");
-      localStorage.removeItem("slimfish_selected_image");
+  searchInput.value = "";
+  activeCategory = MENU[0].id;
 
-      renderTabs();
-      renderMenu();
-      updateBag();
-      renderCart();
-      updateCheckoutSummary();
-      closeCart();
-      closeCheckoutModal();
-      closeImageModal();
+  localStorage.removeItem("slimfish_selected_item");
+  localStorage.removeItem("slimfish_selected_image");
 
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+  renderTabs();
+  renderMenu();
+  updateBag();
+  renderCart();
+  updateCheckoutSummary();
+  closeCart();
+  closeCheckoutModal();
+  closeImageModal();
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
     function confirmAndSendWhats() {
       const confirmSend = confirm("Tem certeza que deseja enviar a prévia no WhatsApp?");
@@ -2637,20 +2804,19 @@
       confirmAndSendWhats();
     });
 
-    sendWhatsBtn.addEventListener("click", () => {
-      if (!validateCheckoutData()) return;
-      
-      const hasBagInCart = cart.some(i => i.itemId === "sacola-termica-sf");
+      sendWhatsBtn.addEventListener("click", () => {
+  if (!validateMinOrder(true)) return;
+  if (!validateCheckoutData()) return;
 
-      if (!hasBagInCart) {
-        // Se a sacolinha não está no carrinho, abre a modal de Upsell
-        upsellBackdrop.classList.add("open");
-        upsellModal.classList.add("open");
-      } else {
-        // Se já está no carrinho, vai direto
-        confirmAndSendWhats();
-      }
-    });
+  const hasBagInCart = cart.some(i => i.itemId === "sacola-termica-sf");
+
+  if (!hasBagInCart) {
+    upsellBackdrop.classList.add("open");
+    upsellModal.classList.add("open");
+  } else {
+    confirmAndSendWhats();
+  }
+});
 
     function highlightIncomingItem(){
       const params = new URLSearchParams(window.location.search);
@@ -2685,13 +2851,28 @@
         setTimeout(() => el.classList.remove("highlight"), 3200);
       }, 300);
     } 
+loadCartState();
+renderTabs();
+renderMenu();
+renderCart();
+updateBag();
+updateCheckoutSummary();
+highlightIncomingItem();
 
-    renderTabs();
-    renderMenu();
-    renderCart();
-    updateBag();
-    updateCheckoutSummary();
-    highlightIncomingItem();
+    [
+  customerName,
+  customerCep,
+  customerStreet,
+  customerNumber,
+  customerDistrict,
+  customerCity,
+  customerComplement,
+  paymentMethod,
+  customerObs
+].forEach(field => {
+  field.addEventListener("input", saveCartState);
+  field.addEventListener("change", saveCartState);
+});
   </script>
 </body>
 </html>
