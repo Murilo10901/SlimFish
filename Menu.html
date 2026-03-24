@@ -1731,9 +1731,9 @@
         items:[
           { code:8, id:"salmao-premium-lombo_kg", name:"Filé de Salmão Premium Lombo", desc:"Corte nobre na bandeja.", img:"IMG_BANDEJAS/Lombo de Salmão.jpeg", details:["R$140/kg"], variants:[{label:"1kg", price:140.00}] },
           { code:9, id:"salmao-premium-cauda_kg", name:"Filé de Salmão Premium Cauda", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/cauda_salmao.jpg", details:["R$120/kg"], variants:[{label:"1kg", price:120.00}] },
-          { code:10, id:"tilapia-st-peter-bandeja_kg", name:"Filé de Tilápia St. Peter", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/FILÉ TILAPIA ST PETER.jpeg", details:["R$78/kg"], variants:[{label:"1gk", price:78.00}] },
+          { code:10, id:"tilapia-st-peter-bandeja_kg", name:"Filé de Tilápia St. Peter", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/FILÉ TILAPIA ST PETER.jpeg", details:["R$78/kg"], variants:[{label:"1kg", price:78.00}] },
           { code:11, id:"filé-pescada-branca_kg", name:"Filé de Pescada Branca", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/File de pescada fresca.jpeg", details:["R$75/kg"], variants:[{label:"1kg", price:75.00}] },
-          { code:12, id:"sardinha-bandeja", name:"Filé de Sardinha", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/filé de sardinha.jpeg", details:["R$45/kg"], variants:[{label:"1gk", price:45.00}] },
+          { code:12, id:"sardinha-bandeja", name:"Filé de Sardinha", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/filé de sardinha.jpeg", details:["R$45/kg"], variants:[{label:"1kg", price:45.00}] },
           { code:13, id:"atum-posta", name:"Filé de Atum Posta", desc:"Venda por peso.", img:"IMG_BANDEJAS/File de ATUM posta.jpeg", details:["R$125/Kg"], variants:[{label:"1 Kg", price:125.00}] },
           { code:14, id:"atum-tolete", name:"Filé de Atum Tolete", desc:"Venda por peso.", img:"IMG_BANDEJAS/File de ATUM TOLETE.jpeg", details:["R$155/Kg"], variants:[{label:"1 Kg", price:155.00}] },
           { code:15, id:"salmao-sem-pele", name:"Filé de Salmão S/Pele", desc:"Venda por peso.", img:"IMG_BANDEJAS/Filé salmão sem pele.jpeg", details:["R$155/Kg"], variants:[{label:"1 Kg", price:155.00}] },
@@ -2502,7 +2502,15 @@ heroFinishBtn.addEventListener("click", () => {
 
       if (city.includes("sao caetano do sul") || city.includes("são caetano do sul")){ return { served:true, name:"São Caetano do Sul", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" }; }
 
-      const antigaZonaNorteLeste = ["tatuape", "tatuapé", "pirituba", "imirim", "tucuruvi", "santana"];
+      const antigaZonaNorteLeste = [
+  "tatuape",
+  "tatuapé",
+  "pirituba",
+  "imirim",
+  "tucuruvi",
+  "santana",
+  "santo amaro"
+];
       if (antigaZonaNorteLeste.some(r => bairro.includes(r))) return { served:true, name:"Zona Norte/Leste", days:[1,6], note:"Atendimento às segundas e sábados.", reason:"rota-especifica" };
 
       return { served:false, name:"Região fora da rota cadastrada", days:[], note:"Sua região não está entre as rotas automáticas cadastradas.", reason:"fora-da-lista" };
