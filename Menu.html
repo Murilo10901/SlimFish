@@ -1729,10 +1729,10 @@
         title:"Por Peso",
         desc:"Itens com valores sujeitos à pesagem e cortes especiais conforme o produto.",
         items:[
-          { code:8, id:"salmao-premium-lombo", name:"Filé de Salmão Premium Lombo", desc:"Corte nobre na bandeja.", img:"IMG_BANDEJAS/Lombo de Salmão.jpeg", details:["R$140/kg"], variants:[{label:"1kg", price:140.00}] },
-          { code:9, id:"salmao-premium-cauda", name:"Filé de Salmão Premium Cauda", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/cauda_salmao.jpg", details:["R$120/kg"], variants:[{label:"1kg", price:120.00}] },
-          { code:10, id:"tilapia-st-peter-bandeja", name:"Filé de Tilápia St. Peter", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/FILÉ TILAPIA ST PETER.jpeg", details:["R$78/kg"], variants:[{label:"1gk", price:78.00}] },
-          { code:11, id:"filé-pescada-branca", name:"Filé de Pescada Branca", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/File de pescada fresca.jpeg", details:["R$75/kg"], variants:[{label:"1kg", price:75.00}] },
+          { code:8, id:"salmao-premium-lombo_kg", name:"Filé de Salmão Premium Lombo", desc:"Corte nobre na bandeja.", img:"IMG_BANDEJAS/Lombo de Salmão.jpeg", details:["R$140/kg"], variants:[{label:"1kg", price:140.00}] },
+          { code:9, id:"salmao-premium-cauda_kg", name:"Filé de Salmão Premium Cauda", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/cauda_salmao.jpg", details:["R$120/kg"], variants:[{label:"1kg", price:120.00}] },
+          { code:10, id:"tilapia-st-peter-bandeja_kg", name:"Filé de Tilápia St. Peter", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/FILÉ TILAPIA ST PETER.jpeg", details:["R$78/kg"], variants:[{label:"1gk", price:78.00}] },
+          { code:11, id:"filé-pescada-branca_kg", name:"Filé de Pescada Branca", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/File de pescada fresca.jpeg", details:["R$75/kg"], variants:[{label:"1kg", price:75.00}] },
           { code:12, id:"sardinha-bandeja", name:"Filé de Sardinha", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/filé de sardinha.jpeg", details:["R$45/kg"], variants:[{label:"1gk", price:45.00}] },
           { code:13, id:"atum-posta", name:"Filé de Atum Posta", desc:"Venda por peso.", img:"IMG_BANDEJAS/File de ATUM posta.jpeg", details:["R$125/Kg"], variants:[{label:"1 Kg", price:125.00}] },
           { code:14, id:"atum-tolete", name:"Filé de Atum Tolete", desc:"Venda por peso.", img:"IMG_BANDEJAS/File de ATUM TOLETE.jpeg", details:["R$155/Kg"], variants:[{label:"1 Kg", price:155.00}] },
@@ -2309,49 +2309,49 @@ saveCartState();
 openCart();
     }
 
-    function renderCart(){
-      updateCheckoutSummary();
+   function renderCart(){
+  updateCheckoutSummary();
 
-      if(cart.length === 0){
-        cartBody.innerHTML = `<div class="cart-empty">Sua sacolinha está vazia.<br>Adicione itens do cardápio para continuar.</div>`;
-        return;
-      }
+  if(cart.length === 0){
+    cartBody.innerHTML = `<div class="cart-empty">Sua sacolinha está vazia.<br>Adicione itens do cardápio para continuar.</div>`;
+    return;
+  }
 
-      cartBody.innerHTML = "";
+  cartBody.innerHTML = "";
 
-      cart.forEach((item, index) => {
-        const itemData = getItemById(item.itemId);
-        const unitLabel = itemData ? getDisplayUnitLabel(itemData) : item.variantLabel;
-        const effectivePrice = getDynamicUnitPrice(item.itemId, item.qty, item.baseUnitPrice);
-        const lineTotal = effectivePrice * item.qty;
+  cart.forEach((item, index) => {
+    const itemData = getItemById(item.itemId);
+    const unitLabel = item.variantLabel;
+    const effectivePrice = getDynamicUnitPrice(item.itemId, item.qty, item.baseUnitPrice);
+    const lineTotal = effectivePrice * item.qty;
 
-        const el = document.createElement("div");
-        el.className = "cart-item";
+    const el = document.createElement("div");
+    el.className = "cart-item";
 
-        el.innerHTML = `
-          <div class="cart-top">
-            <div>
-              <div class="cart-title">#${item.code} • ${item.name}</div>
-              <div class="cart-meta">${unitLabel} • ${money(effectivePrice)} cada</div>
-            </div>
+    el.innerHTML = `
+      <div class="cart-top">
+        <div>
+          <div class="cart-title">#${item.code} • ${item.name}</div>
+          <div class="cart-meta">${unitLabel} • ${money(effectivePrice)} cada</div>
+        </div>
 
-            <div style="text-align:right;">
-              <div style="font-weight:1000;">${money(lineTotal)}</div>
-              <div class="remove" data-remove="${index}">Remover</div>
-            </div>
-          </div>
+        <div style="text-align:right;">
+          <div style="font-weight:1000;">${money(lineTotal)}</div>
+          <div class="remove" data-remove="${index}">Remover</div>
+        </div>
+      </div>
 
-          <div class="qty">
-            <div class="qbtn" data-dec="${index}">−</div>
-            <span>${item.qty}</span>
-            <div class="qbtn" data-inc="${index}">+</div>
-          </div>
+      <div class="qty">
+        <div class="qbtn" data-dec="${index}">−</div>
+        <span>${item.qty}</span>
+        <div class="qbtn" data-inc="${index}">+</div>
+      </div>
 
-          <div class="notes">
-            <label>Observação do item</label>
-            <textarea data-note="${index}" placeholder="Ex: cortar em cubos, sem pele, etc.">${item.note || ""}</textarea>
-          </div>
-        `;
+      <div class="notes">
+        <label>Observação do item</label>
+        <textarea data-note="${index}" placeholder="Ex: cortar em cubos, sem pele, etc.">${item.note || ""}</textarea>
+      </div>
+    `;
 
         cartBody.appendChild(el);
 
