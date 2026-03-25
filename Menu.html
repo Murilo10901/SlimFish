@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1266,6 +1268,129 @@
       transform:translate(-50%, -50%) scale(1);
     }
 
+    .customize-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.62);
+      z-index:151;
+      opacity:0;
+      pointer-events:none;
+      transition:.22s ease;
+    }
+
+    .customize-backdrop.open{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .customize-modal{
+      position:fixed;
+      left:50%;
+      top:50%;
+      transform:translate(-50%, -50%) scale(.96);
+      width:min(520px, calc(100% - 20px));
+      z-index:152;
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(22,16,34,.98), rgba(16,12,24,.98));
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 30px 80px rgba(0,0,0,.45);
+      opacity:0;
+      pointer-events:none;
+      transition:.22s ease;
+      overflow:hidden;
+    }
+
+    .customize-modal.open{
+      opacity:1;
+      pointer-events:auto;
+      transform:translate(-50%, -50%) scale(1);
+    }
+
+    .customize-head{
+      padding:18px 20px 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .customize-title{
+      font-size:18px;
+      font-weight:1000;
+    }
+
+    .customize-subtitle{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+      margin-top:6px;
+    }
+
+    .customize-body{
+      padding:18px 20px 22px;
+      display:grid;
+      gap:14px;
+    }
+
+    .customize-help{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.55;
+      margin-top:-4px;
+    }
+
+    .customize-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      margin-top:2px;
+    }
+
+    .customize-error{
+      display:none;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,93,93,.24);
+      background:rgba(255,93,93,.10);
+      color:#ffd3d3;
+      font-size:12px;
+      font-weight:900;
+    }
+
+    .customize-error.show{
+      display:block;
+    }
+
+    .customize-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      font-size:12px;
+      font-weight:900;
+      width:max-content;
+    }
+
+    .customize-grid{
+      display:grid;
+      gap:12px;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 640px){
+      .customize-grid{
+        grid-template-columns:1fr;
+      }
+
+      .customize-actions .btn{
+        width:100%;
+      }
+    }
 
     .tabs-hint {
   font-size: 12px;
@@ -1584,7 +1709,7 @@
         <div class="form-row" style="margin-top:14px;">
           <div class="field">
             <label for="customerName">Seu nome</label>
-            <input class="input" id="customerName" placeholder="Ex: Rogério Lopes">
+            <input class="input" id="customerName" placeholder="Nome">
           </div>
 
           <div class="field">
@@ -1629,6 +1754,22 @@
           <input class="input" id="customerComplement" placeholder="Ex: apto 21, bloco B, referência...">
         </div>
 
+        <div class="form-row" style="margin-top:12px;">
+          <div class="field">
+            <label for="deliveryPreference">Entrega</label>
+            <select class="select" id="deliveryPreference">
+              <option value="">Selecione</option>
+              <option value="proxima-rota">Receber no próximo dia de entrega da minha região</option>
+              <option value="agendar-data">Programar uma data</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="deliveryDate">Data desejada</label>
+            <input class="input" id="deliveryDate" type="date">
+          </div>
+        </div>
+
         <div class="field" style="margin-top:12px;">
           <label for="customerObs">Observação geral (opcional)</label>
           <textarea class="textarea" id="customerObs" placeholder="Ex: telefone, etc."></textarea>
@@ -1660,6 +1801,68 @@
           <button class="btn orange" id="sendWhatsBtn">Enviar prévia no WhatsApp</button>
           <button class="btn ghost" id="continueAnywayBtn" style="display:none;">Continuar mesmo assim</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="customize-backdrop" id="customizeBackdrop"></div>
+  <div class="customize-modal" id="customizeModal">
+    <div class="customize-head">
+      <div>
+        <div class="customize-title" id="customizeTitle">Personalizar item</div>
+        <div class="customize-subtitle" id="customizeSubtitle">Escolha as opções abaixo para adicionar o item corretamente.</div>
+      </div>
+      <div class="close" id="customizeCloseBtn">✕</div>
+    </div>
+    <div class="customize-body">
+      <div class="customize-chip" id="customizeItemLabel">Item selecionado</div>
+      <div class="customize-error" id="customizeError"></div>
+
+      <div class="customize-grid" id="customizeCutFields" style="display:none;">
+        <div class="field">
+          <label for="customizeCutSelect">Como deseja receber?</label>
+          <select class="select" id="customizeCutSelect">
+            <option value="">Selecione</option>
+            <option value="Inteiro">Inteiro</option>
+            <option value="Inteira e limpa">Inteira e limpa</option>
+            <option value="Em postas">Em postas</option>
+            <option value="Em filés">Em filés</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="customizeSkinSelect">Pele</label>
+          <select class="select" id="customizeSkinSelect">
+            <option value="">Selecione</option>
+            <option value="Com pele">Com pele</option>
+            <option value="Sem pele">Sem pele</option>
+          </select>
+        </div>
+
+        <div class="field" id="customizeBoneField" style="display:none;">
+          <label for="customizeBoneSelect">Osso</label>
+          <select class="select" id="customizeBoneSelect">
+            <option value="">Selecione</option>
+            <option value="Com osso">Com osso</option>
+            <option value="Sem osso">Sem osso</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field" id="customizeWeightField" style="display:none;">
+        <label for="customizeWeightInput">Peso desejado</label>
+        <input class="input" id="customizeWeightInput" placeholder="Ex: 1kg, 1,2kg, 1,5kg">
+        <div class="customize-help">Informe o peso desejado para que o atendimento finalize o corte e a pesagem corretamente.</div>
+      </div>
+
+      <div class="field">
+        <label for="customizeExtraNote">Observação complementar (opcional)</label>
+        <textarea class="textarea" id="customizeExtraNote" placeholder="Ex: tirar espinha, mandar mais fino, caprichar nos filés..."></textarea>
+      </div>
+
+      <div class="customize-actions">
+        <button class="btn ghost" id="customizeCancelBtn">Cancelar</button>
+        <button class="btn orange" id="customizeConfirmBtn">Confirmar e adicionar</button>
       </div>
     </div>
   </div>
@@ -1729,10 +1932,10 @@
         title:"Por Peso",
         desc:"Itens com valores sujeitos à pesagem e cortes especiais conforme o produto.",
         items:[
-          { code:8, id:"salmao-premium-lombo_kg", name:"Filé de Salmão Premium Lombo", desc:"Corte nobre na bandeja.", img:"IMG_BANDEJAS/Lombo de Salmão.jpeg", details:["R$140/kg"], variants:[{label:"1kg", price:140.00}] },
-          { code:9, id:"salmao-premium-cauda_kg", name:"Filé de Salmão Premium Cauda", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/cauda_salmao.jpg", details:["R$120/kg"], variants:[{label:"1kg", price:120.00}] },
-          { code:10, id:"tilapia-st-peter-bandeja_kg", name:"Filé de Tilápia St. Peter", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/FILÉ TILAPIA ST PETER.jpeg", details:["R$78/kg"], variants:[{label:"1kg", price:78.00}] },
-          { code:11, id:"filé-pescada-branca_kg", name:"Filé de Pescada Branca", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/File de pescada fresca.jpeg", details:["R$75/kg"], variants:[{label:"1kg", price:75.00}] },
+          { code:8, id:"salmao-premium-lombo", name:"Filé de Salmão Premium Lombo", desc:"Corte nobre na bandeja.", img:"IMG_BANDEJAS/Lombo de Salmão.jpeg", details:["R$140/kg"], variants:[{label:"1kg", price:140.00}] },
+          { code:9, id:"salmao-premium-cauda", name:"Filé de Salmão Premium Cauda", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/cauda_salmao.jpg", details:["R$120/kg"], variants:[{label:"1kg", price:120.00}] },
+          { code:10, id:"tilapia-st-peter-bandeja", name:"Filé de Tilápia St. Peter", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/FILÉ TILAPIA ST PETER.jpeg", details:["R$78/kg"], variants:[{label:"1kg", price:78.00}] },
+          { code:11, id:"filé-pescada-branca", name:"Filé de Pescada Branca", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/File de pescada fresca.jpeg", details:["R$75/kg"], variants:[{label:"1kg", price:75.00}] },
           { code:12, id:"sardinha-bandeja", name:"Filé de Sardinha", desc:"Corte nobre na bandeja", img:"IMG_BANDEJAS/filé de sardinha.jpeg", details:["R$45/kg"], variants:[{label:"1kg", price:45.00}] },
           { code:13, id:"atum-posta", name:"Filé de Atum Posta", desc:"Venda por peso.", img:"IMG_BANDEJAS/File de ATUM posta.jpeg", details:["R$125/Kg"], variants:[{label:"1 Kg", price:125.00}] },
           { code:14, id:"atum-tolete", name:"Filé de Atum Tolete", desc:"Venda por peso.", img:"IMG_BANDEJAS/File de ATUM TOLETE.jpeg", details:["R$155/Kg"], variants:[{label:"1 Kg", price:155.00}] },
@@ -1838,6 +2041,7 @@
 
     let currentImageModalId = null;
     let imageModalTimer = null;
+    let pendingCustomizeItem = null;
 
     const tabsEl = document.getElementById("tabs");
     const menuGridEl = document.getElementById("menuGrid");
@@ -1877,6 +2081,8 @@
     const customerCity = document.getElementById("customerCity");
     const customerComplement = document.getElementById("customerComplement");
     const paymentMethod = document.getElementById("paymentMethod");
+    const deliveryPreference = document.getElementById("deliveryPreference");
+    const deliveryDate = document.getElementById("deliveryDate");
     const customerObs = document.getElementById("customerObs");
 
     const validateCepBtn = document.getElementById("validateCepBtn");
@@ -1894,6 +2100,24 @@
     const imageModalImg = document.getElementById("imageModalImg");
     const imageModalCaption = document.getElementById("imageModalCaption");
     const imageCloseBtn = document.getElementById("imageCloseBtn");
+
+    const customizeBackdrop = document.getElementById("customizeBackdrop");
+    const customizeModal = document.getElementById("customizeModal");
+    const customizeCloseBtn = document.getElementById("customizeCloseBtn");
+    const customizeCancelBtn = document.getElementById("customizeCancelBtn");
+    const customizeConfirmBtn = document.getElementById("customizeConfirmBtn");
+    const customizeTitle = document.getElementById("customizeTitle");
+    const customizeSubtitle = document.getElementById("customizeSubtitle");
+    const customizeItemLabel = document.getElementById("customizeItemLabel");
+    const customizeError = document.getElementById("customizeError");
+    const customizeCutFields = document.getElementById("customizeCutFields");
+    const customizeCutSelect = document.getElementById("customizeCutSelect");
+    const customizeSkinSelect = document.getElementById("customizeSkinSelect");
+    const customizeBoneField = document.getElementById("customizeBoneField");
+    const customizeBoneSelect = document.getElementById("customizeBoneSelect");
+    const customizeWeightField = document.getElementById("customizeWeightField");
+    const customizeWeightInput = document.getElementById("customizeWeightInput");
+    const customizeExtraNote = document.getElementById("customizeExtraNote");
 
     function normalizeText(str){
       return (str || "")
@@ -1918,6 +2142,8 @@ function saveCartState() {
     customerCity: customerCity.value,
     customerComplement: customerComplement.value,
     paymentMethod: paymentMethod.value,
+    deliveryPreference: deliveryPreference.value,
+    deliveryDate: deliveryDate.value,
     customerObs: customerObs.value,
     routeInfo: routeInfo,
     cepValidated: cepValidated,
@@ -1946,6 +2172,8 @@ function loadCartState() {
     customerCity.value = data.customerCity || "";
     customerComplement.value = data.customerComplement || "";
     paymentMethod.value = data.paymentMethod || "";
+    deliveryPreference.value = data.deliveryPreference || "";
+    deliveryDate.value = data.deliveryDate || "";
     customerObs.value = data.customerObs || "";
 
     routeInfo = data.routeInfo || null;
@@ -2025,6 +2253,107 @@ function validateMinOrder(showMessage = true) {
 
     function getActiveCategory(){
       return MENU.find(c => c.id === activeCategory);
+    }
+
+    function getCategoryByItemId(itemId){
+      return MENU.find(category => category.items.some(item => item.id === itemId)) || null;
+    }
+
+    function isCutRequiredItem(itemId){
+      return ["anchova-inteira", "robalo-inteiro"].includes(itemId);
+    }
+
+    function isWeightItem(itemId){
+      const category = getCategoryByItemId(itemId);
+      return category ? category.id === "por-peso" : false;
+    }
+
+    function requiresBoneChoice(itemId){
+      return itemId === "robalo-inteiro";
+    }
+
+    function getItemNotePlaceholder(itemId){
+      if (isCutRequiredItem(itemId)) {
+        return requiresBoneChoice(itemId)
+          ? "Clique em adicionar para escolher corte, pele e osso."
+          : "Clique em adicionar para escolher corte e pele.";
+      }
+      if (isWeightItem(itemId)) {
+        return "Clique em adicionar para informar o peso desejado.";
+      }
+      return "Observação do item (opcional)";
+    }
+
+    function composeItemNote(parts = []){
+      return parts.map(part => (part || "").trim()).filter(Boolean).join(" | ");
+    }
+
+    function openCustomizeModal(config){
+      pendingCustomizeItem = config;
+      customizeTitle.textContent = config.mode === "cut" ? "Como deseja receber o peixe?" : "Informe o peso desejado";
+      customizeSubtitle.textContent = config.mode === "cut"
+        ? "Escolha o corte e a pele antes de adicionar o item à prévia."
+        : "Este item é vendido por peso. Informe o peso desejado antes de adicionar.";
+      customizeItemLabel.textContent = `${config.item.name} • ${config.variant.label} • ${money(config.variant.price)}`;
+      customizeError.className = "customize-error";
+      customizeError.textContent = "";
+      customizeExtraNote.value = config.initialNote || "";
+
+      if(config.mode === "cut"){
+        customizeCutFields.style.display = "grid";
+        customizeWeightField.style.display = "none";
+        customizeCutSelect.value = "";
+        customizeSkinSelect.value = "";
+        customizeBoneSelect.value = "";
+        customizeBoneField.style.display = requiresBoneChoice(config.item.id) ? "block" : "none";
+        customizeWeightInput.value = "";
+      } else {
+        customizeCutFields.style.display = "none";
+        customizeBoneField.style.display = "none";
+        customizeWeightField.style.display = "block";
+        customizeCutSelect.value = "";
+        customizeSkinSelect.value = "";
+        customizeBoneSelect.value = "";
+        customizeWeightInput.value = config.initialWeight || "";
+      }
+
+      customizeBackdrop.classList.add("open");
+      customizeModal.classList.add("open");
+      setTimeout(() => {
+        if(config.mode === "cut") customizeCutSelect.focus();
+        else customizeWeightInput.focus();
+      }, 50);
+    }
+
+    function closeCustomizeModal(){
+      customizeBackdrop.classList.remove("open");
+      customizeModal.classList.remove("open");
+      customizeError.className = "customize-error";
+      customizeError.textContent = "";
+      customizeCutSelect.value = "";
+      customizeSkinSelect.value = "";
+      customizeBoneSelect.value = "";
+      customizeBoneField.style.display = "none";
+      customizeWeightInput.value = "";
+      customizeExtraNote.value = "";
+      pendingCustomizeItem = null;
+    }
+
+    function handleRequiredItemFlow(item, variantIndex, inlineNote = ""){
+      const variant = item.variants[variantIndex];
+      const note = (inlineNote || "").trim();
+
+      if (isCutRequiredItem(item.id)) {
+        openCustomizeModal({ mode:"cut", item, variantIndex, variant, initialNote: note });
+        return true;
+      }
+
+      if (isWeightItem(item.id)) {
+        openCustomizeModal({ mode:"weight", item, variantIndex, variant, initialNote: note, initialWeight: note });
+        return true;
+      }
+
+      return false;
     }
 
     function getDynamicUnitPrice(itemId, qty, fallbackPrice){
@@ -2127,6 +2456,47 @@ function validateMinOrder(showMessage = true) {
     imageModalBackdrop.addEventListener("click", closeImageModal);
     imageCloseBtn.addEventListener("click", closeImageModal);
 
+    customizeBackdrop.addEventListener("click", closeCustomizeModal);
+    customizeCloseBtn.addEventListener("click", closeCustomizeModal);
+    customizeCancelBtn.addEventListener("click", closeCustomizeModal);
+
+    customizeConfirmBtn.addEventListener("click", () => {
+      if(!pendingCustomizeItem) return;
+
+      const extraNote = customizeExtraNote.value.trim();
+
+      if(pendingCustomizeItem.mode === "cut") {
+        const cut = customizeCutSelect.value;
+        const skin = customizeSkinSelect.value;
+        const bone = customizeBoneSelect.value;
+        const needsBone = requiresBoneChoice(pendingCustomizeItem.item.id);
+
+        if(!cut || !skin || (needsBone && !bone)){
+          customizeError.textContent = needsBone
+            ? "Selecione o corte, a opção de pele e a opção de osso para continuar."
+            : "Selecione o corte e a opção de pele para continuar.";
+          customizeError.className = "customize-error show";
+          return;
+        }
+
+        const note = composeItemNote([cut, skin, needsBone ? bone : "", extraNote]);
+        addToCart(pendingCustomizeItem.item, pendingCustomizeItem.variantIndex, note);
+        closeCustomizeModal();
+        return;
+      }
+
+      const weight = customizeWeightInput.value.trim();
+      if(!weight){
+        customizeError.textContent = "Informe o peso desejado para adicionar este item.";
+        customizeError.className = "customize-error show";
+        return;
+      }
+
+      const note = composeItemNote([`Peso desejado: ${weight}`, extraNote]);
+      addToCart(pendingCustomizeItem.item, pendingCustomizeItem.variantIndex, note);
+      closeCustomizeModal();
+    });
+
     function renderTabs(){
       tabsEl.innerHTML = "";
       MENU.forEach(cat => {
@@ -2194,6 +2564,8 @@ function validateMinOrder(showMessage = true) {
 
             <div class="item-meta">
               ${(item.details || []).map(d => `<span class="pill">${d}</span>`).join("")}
+              ${isCutRequiredItem(item.id) ? `<span class="pill">${requiresBoneChoice(item.id) ? "Informe corte, pele e osso" : "Informe corte e pele"}</span>` : ``}
+              ${isWeightItem(item.id) ? `<span class="pill">Informe o peso desejado</span>` : ``}
             </div>
 
             <div class="item-row">
@@ -2208,7 +2580,7 @@ function validateMinOrder(showMessage = true) {
             </div>
 
             <div class="item-bottom-actions">
-              <textarea class="item-note-inline" id="note-inline-${item.id}" placeholder="Observação do item (opcional)"></textarea>
+              <textarea class="item-note-inline" id="note-inline-${item.id}" placeholder="${getItemNotePlaceholder(item.id)}"></textarea>
               <div class="item-row">
                 <button class="add-btn" data-add="${item.id}">Adicionar à prévia</button>
               </div>
@@ -2228,7 +2600,15 @@ function validateMinOrder(showMessage = true) {
         });
 
         card.querySelector(`[data-add="${item.id}"]`).addEventListener("click", () => {
-          addToCart(item, Number(select.value), noteEl.value.trim());
+          const variantIndex = Number(select.value);
+          const inlineNote = noteEl.value.trim();
+
+          if (handleRequiredItemFlow(item, variantIndex, inlineNote)) {
+            noteEl.value = "";
+            return;
+          }
+
+          addToCart(item, variantIndex, inlineNote);
           noteEl.value = "";
         });
 
@@ -2274,84 +2654,89 @@ function validateMinOrder(showMessage = true) {
 
     function addToCart(item, variantIndex, inlineNote = ""){
       const variant = item.variants[variantIndex];
-      const key = `${item.id}::${variant.label}`;
+      const note = (inlineNote || "").trim();
+      const baseKey = `${item.id}::${variant.label}`;
+
+      if (isCutRequiredItem(item.id) && !note) {
+        return false;
+      }
+
+      if (isWeightItem(item.id) && !note) {
+        return false;
+      }
 
       // Se o cliente adicionar a sacolinha manualmente, resetamos a variável de recusa
       if (item.id === "sacola-termica-sf") {
         declinedUpsellBag = false;
       }
 
-      const existing = cart.find(x => x.key === key);
+      const existing = cart.find(x => x.key === `${baseKey}::${note}`);
       if(existing){
         existing.qty += 1;
-        if(inlineNote){
-          existing.note = existing.note
-            ? `${existing.note} | ${inlineNote}`
-            : inlineNote;
-        }
       } else {
         cart.push({
-          key,
+          key: `${baseKey}::${note}`,
           itemId: item.id,
           code: item.code,
           name: item.name,
           variantLabel: variant.label,
           baseUnitPrice: variant.price,
           qty: 1,
-          note: inlineNote || ""
+          note: note || ""
         });
       }
 
       updateBag();
-renderCart();
-updateCheckoutSummary();
-saveCartState();
-openCart();
+      renderCart();
+      updateCheckoutSummary();
+      saveCartState();
+      openCart();
+      return true;
     }
 
-   function renderCart(){
-  updateCheckoutSummary();
+    function renderCart(){
+      updateCheckoutSummary();
 
-  if(cart.length === 0){
-    cartBody.innerHTML = `<div class="cart-empty">Sua sacolinha está vazia.<br>Adicione itens do cardápio para continuar.</div>`;
-    return;
-  }
+      if(cart.length === 0){
+        cartBody.innerHTML = `<div class="cart-empty">Sua sacolinha está vazia.<br>Adicione itens do cardápio para continuar.</div>`;
+        return;
+      }
 
-  cartBody.innerHTML = "";
+      cartBody.innerHTML = "";
 
-  cart.forEach((item, index) => {
-    const itemData = getItemById(item.itemId);
-    const unitLabel = item.variantLabel;
-    const effectivePrice = getDynamicUnitPrice(item.itemId, item.qty, item.baseUnitPrice);
-    const lineTotal = effectivePrice * item.qty;
+      cart.forEach((item, index) => {
+        const itemData = getItemById(item.itemId);
+        const unitLabel = item.variantLabel;
+        const effectivePrice = getDynamicUnitPrice(item.itemId, item.qty, item.baseUnitPrice);
+        const lineTotal = effectivePrice * item.qty;
 
-    const el = document.createElement("div");
-    el.className = "cart-item";
+        const el = document.createElement("div");
+        el.className = "cart-item";
 
-    el.innerHTML = `
-      <div class="cart-top">
-        <div>
-          <div class="cart-title">#${item.code} • ${item.name}</div>
-          <div class="cart-meta">${unitLabel} • ${money(effectivePrice)} cada</div>
-        </div>
+        el.innerHTML = `
+          <div class="cart-top">
+            <div>
+              <div class="cart-title">#${item.code} • ${item.name}</div>
+              <div class="cart-meta">${unitLabel} • ${money(effectivePrice)} cada</div>
+            </div>
 
-        <div style="text-align:right;">
-          <div style="font-weight:1000;">${money(lineTotal)}</div>
-          <div class="remove" data-remove="${index}">Remover</div>
-        </div>
-      </div>
+            <div style="text-align:right;">
+              <div style="font-weight:1000;">${money(lineTotal)}</div>
+              <div class="remove" data-remove="${index}">Remover</div>
+            </div>
+          </div>
 
-      <div class="qty">
-        <div class="qbtn" data-dec="${index}">−</div>
-        <span>${item.qty}</span>
-        <div class="qbtn" data-inc="${index}">+</div>
-      </div>
+          <div class="qty">
+            <div class="qbtn" data-dec="${index}">−</div>
+            <span>${item.qty}</span>
+            <div class="qbtn" data-inc="${index}">+</div>
+          </div>
 
-      <div class="notes">
-        <label>Observação do item</label>
-        <textarea data-note="${index}" placeholder="Ex: cortar em cubos, sem pele, etc.">${item.note || ""}</textarea>
-      </div>
-    `;
+          <div class="notes">
+            <label>Observação do item</label>
+            <textarea data-note="${index}" placeholder="Ex: cortar em cubos, sem pele, etc.">${item.note || ""}</textarea>
+          </div>
+        `;
 
         cartBody.appendChild(el);
 
@@ -2480,7 +2865,8 @@ heroFinishBtn.addEventListener("click", () => {
 
       if(city.includes("cotia")){ return { served:true, name:"Cotia", days:[2,6], note:"Atendimento às terças e sábados.", reason:"rota-especifica" }; }
       if(bairro.includes("vila joaniza")){ return { served:true, name:"Vila Joaniza", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" }; }
-      if(bairro.includes("interlagos") || bairro.includes("guarapiranga")){ return { served:true, name:"Interlagos / Guarapiranga", days:[1,3,5], note:"Atendimento às segundas, quartas e sextas.", reason:"rota-especifica" }; }
+      if(bairro.includes("interlagos")){ return { served:true, name:"Interlagos", days:[1,3,5], note:"Atendimento às segundas, quartas e sextas.", reason:"rota-especifica" }; }
+      if(bairro.includes("guarapiranga") || bairro.includes("santo amaro")){ return { served:true, name:"Região Sul / até Interlagos", days:[1,2,3,4,5,6], note:"Atendimento diário na região cadastrada.", reason:"rota-especifica" }; }
 
       const sbcBairros = ["baeta neves", "ferrazopolis", "ferrazópolis", "planalto", "demarchi", "centro"];
       if (city.includes("sao bernardo do campo") || city.includes("são bernardo do campo")) {
@@ -2502,15 +2888,7 @@ heroFinishBtn.addEventListener("click", () => {
 
       if (city.includes("sao caetano do sul") || city.includes("são caetano do sul")){ return { served:true, name:"São Caetano do Sul", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" }; }
 
-      const antigaZonaNorteLeste = [
-  "tatuape",
-  "tatuapé",
-  "pirituba",
-  "imirim",
-  "tucuruvi",
-  "santana",
-  "santo amaro"
-];
+      const antigaZonaNorteLeste = ["tatuape", "tatuapé", "pirituba", "imirim", "tucuruvi", "santana"];
       if (antigaZonaNorteLeste.some(r => bairro.includes(r))) return { served:true, name:"Zona Norte/Leste", days:[1,6], note:"Atendimento às segundas e sábados.", reason:"rota-especifica" };
 
       return { served:false, name:"Região fora da rota cadastrada", days:[], note:"Sua região não está entre as rotas automáticas cadastradas.", reason:"fora-da-lista" };
@@ -2720,6 +3098,18 @@ heroFinishBtn.addEventListener("click", () => {
         return false;
       }
 
+      if(!deliveryPreference.value){
+        alert("Selecione se deseja receber no próximo dia da rota ou programar uma data.");
+        deliveryPreference.focus();
+        return false;
+      }
+
+      if(deliveryPreference.value === "agendar-data" && !deliveryDate.value){
+        alert("Informe a data desejada para a entrega.");
+        deliveryDate.focus();
+        return false;
+      }
+
       return true;
     }
 
@@ -2747,6 +3137,7 @@ heroFinishBtn.addEventListener("click", () => {
       lines.push(`Endereço: ${address}`);
       lines.push(`Pagamento desejado: ${paymentMethod.value}`);
       lines.push(`Rota/Região: ${regionLine}`);
+      lines.push(`Entrega desejada: ${deliveryPreference.value === "agendar-data" ? `Programada para ${deliveryDate.value}` : "Próximo dia de entrega da região"}`);
 
       if(customerObs.value.trim()){
         lines.push(`Observação geral: ${customerObs.value.trim()}`);
@@ -2799,6 +3190,8 @@ heroFinishBtn.addEventListener("click", () => {
   customerCity.value = "";
   customerComplement.value = "";
   paymentMethod.value = "";
+  deliveryPreference.value = "";
+  deliveryDate.value = "";
   customerObs.value = "";
 
   cart = [];
@@ -2887,7 +3280,21 @@ heroFinishBtn.addEventListener("click", () => {
   }
 });
 
-    function highlightIncomingItem(){
+
+    function updateDeliveryDateState(){
+      const scheduled = deliveryPreference.value === "agendar-data";
+      deliveryDate.disabled = !scheduled;
+      if(!scheduled){
+        deliveryDate.value = "";
+      }
+    }
+
+    deliveryPreference.addEventListener("change", () => {
+      updateDeliveryDateState();
+      saveCartState();
+    });
+
+        function highlightIncomingItem(){
       const params = new URLSearchParams(window.location.search);
       const selected = params.get("item") || localStorage.getItem("slimfish_selected_item") || "";
       if(!selected) return;
@@ -2921,6 +3328,7 @@ heroFinishBtn.addEventListener("click", () => {
       }, 300);
     } 
 loadCartState();
+updateDeliveryDateState();
 renderTabs();
 renderMenu();
 renderCart();
@@ -2937,6 +3345,8 @@ highlightIncomingItem();
   customerCity,
   customerComplement,
   paymentMethod,
+  deliveryPreference,
+  deliveryDate,
   customerObs
 ].forEach(field => {
   field.addEventListener("input", saveCartState);
