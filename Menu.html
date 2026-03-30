@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1709,7 +1710,7 @@
         <div class="form-row" style="margin-top:14px;">
           <div class="field">
             <label for="customerName">Seu nome</label>
-            <input class="input" id="customerName" placeholder="Nome">
+            <input class="input" id="customerName" placeholder="Ex: Rogério Lopes">
           </div>
 
           <div class="field">
@@ -1824,7 +1825,6 @@
           <select class="select" id="customizeCutSelect">
             <option value="">Selecione</option>
             <option value="Inteiro">Inteiro</option>
-            <option value="Inteira e limpa">Inteira e limpa</option>
             <option value="Em postas">Em postas</option>
             <option value="Em filés">Em filés</option>
           </select>
@@ -1836,15 +1836,6 @@
             <option value="">Selecione</option>
             <option value="Com pele">Com pele</option>
             <option value="Sem pele">Sem pele</option>
-          </select>
-        </div>
-
-        <div class="field" id="customizeBoneField" style="display:none;">
-          <label for="customizeBoneSelect">Osso</label>
-          <select class="select" id="customizeBoneSelect">
-            <option value="">Selecione</option>
-            <option value="Com osso">Com osso</option>
-            <option value="Sem osso">Sem osso</option>
           </select>
         </div>
       </div>
@@ -2113,8 +2104,6 @@
     const customizeCutFields = document.getElementById("customizeCutFields");
     const customizeCutSelect = document.getElementById("customizeCutSelect");
     const customizeSkinSelect = document.getElementById("customizeSkinSelect");
-    const customizeBoneField = document.getElementById("customizeBoneField");
-    const customizeBoneSelect = document.getElementById("customizeBoneSelect");
     const customizeWeightField = document.getElementById("customizeWeightField");
     const customizeWeightInput = document.getElementById("customizeWeightInput");
     const customizeExtraNote = document.getElementById("customizeExtraNote");
@@ -2268,15 +2257,9 @@ function validateMinOrder(showMessage = true) {
       return category ? category.id === "por-peso" : false;
     }
 
-    function requiresBoneChoice(itemId){
-      return itemId === "robalo-inteiro";
-    }
-
     function getItemNotePlaceholder(itemId){
       if (isCutRequiredItem(itemId)) {
-        return requiresBoneChoice(itemId)
-          ? "Clique em adicionar para escolher corte, pele e osso."
-          : "Clique em adicionar para escolher corte e pele.";
+        return "Clique em adicionar para escolher corte e pele.";
       }
       if (isWeightItem(itemId)) {
         return "Clique em adicionar para informar o peso desejado.";
@@ -2304,16 +2287,12 @@ function validateMinOrder(showMessage = true) {
         customizeWeightField.style.display = "none";
         customizeCutSelect.value = "";
         customizeSkinSelect.value = "";
-        customizeBoneSelect.value = "";
-        customizeBoneField.style.display = requiresBoneChoice(config.item.id) ? "block" : "none";
         customizeWeightInput.value = "";
       } else {
         customizeCutFields.style.display = "none";
-        customizeBoneField.style.display = "none";
         customizeWeightField.style.display = "block";
         customizeCutSelect.value = "";
         customizeSkinSelect.value = "";
-        customizeBoneSelect.value = "";
         customizeWeightInput.value = config.initialWeight || "";
       }
 
@@ -2332,8 +2311,6 @@ function validateMinOrder(showMessage = true) {
       customizeError.textContent = "";
       customizeCutSelect.value = "";
       customizeSkinSelect.value = "";
-      customizeBoneSelect.value = "";
-      customizeBoneField.style.display = "none";
       customizeWeightInput.value = "";
       customizeExtraNote.value = "";
       pendingCustomizeItem = null;
@@ -2468,18 +2445,14 @@ function validateMinOrder(showMessage = true) {
       if(pendingCustomizeItem.mode === "cut") {
         const cut = customizeCutSelect.value;
         const skin = customizeSkinSelect.value;
-        const bone = customizeBoneSelect.value;
-        const needsBone = requiresBoneChoice(pendingCustomizeItem.item.id);
 
-        if(!cut || !skin || (needsBone && !bone)){
-          customizeError.textContent = needsBone
-            ? "Selecione o corte, a opção de pele e a opção de osso para continuar."
-            : "Selecione o corte e a opção de pele para continuar.";
+        if(!cut || !skin){
+          customizeError.textContent = "Selecione o corte e a opção de pele para continuar.";
           customizeError.className = "customize-error show";
           return;
         }
 
-        const note = composeItemNote([cut, skin, needsBone ? bone : "", extraNote]);
+        const note = composeItemNote([cut, skin, extraNote]);
         addToCart(pendingCustomizeItem.item, pendingCustomizeItem.variantIndex, note);
         closeCustomizeModal();
         return;
@@ -2564,7 +2537,7 @@ function validateMinOrder(showMessage = true) {
 
             <div class="item-meta">
               ${(item.details || []).map(d => `<span class="pill">${d}</span>`).join("")}
-              ${isCutRequiredItem(item.id) ? `<span class="pill">${requiresBoneChoice(item.id) ? "Informe corte, pele e osso" : "Informe corte e pele"}</span>` : ``}
+              ${isCutRequiredItem(item.id) ? `<span class="pill">Informe corte e pele</span>` : ``}
               ${isWeightItem(item.id) ? `<span class="pill">Informe o peso desejado</span>` : ``}
             </div>
 
@@ -2845,6 +2818,16 @@ heroFinishBtn.addEventListener("click", () => {
       const city = normalizeText(addressData.localidade || "");
       const bairro = normalizeText(addressData.bairro || "");
       const uf = normalizeText(addressData.uf || "");
+      const logradouro = normalizeText(addressData.logradouro || "");
+      const cep = String(addressData.cep || "").replace(/\D/g, "");
+
+      const inCepRange = (start, end) => {
+        if(cep.length !== 8) return false;
+        const n = Number(cep);
+        return n >= Number(String(start).replace(/\D/g, "")) && n <= Number(String(end).replace(/\D/g, ""));
+      };
+
+      const matchAny = (terms) => terms.some(term => bairro.includes(term) || city.includes(term) || logradouro.includes(term));
 
       if(uf !== "sp"){
         return { served:false, name:"Fora da área atendida", days:[], note:"Atendimento somente nas regiões cadastradas em São Paulo.", reason:"fora-da-regra" };
@@ -2854,46 +2837,96 @@ heroFinishBtn.addEventListener("click", () => {
         return { served:false, name:"Região não atendida", days:[], note:"No momento esta região não é atendida.", reason:"nao-atende" };
       }
 
+      const cepRules = [
+        { name:"Interlagos", start:"04801-000", end:"04801-999", days:[1,3,5], note:"Atendimento às segundas, quartas e sextas." },
+        { name:"Região Sul / Socorro até Santo Amaro", start:"04700-000", end:"04799-999", days:[1,2,3,4,5,6], note:"Atendimento todos os dias." },
+        { name:"Região Sul / faixa complementar", start:"04703-000", end:"04703-999", days:[1,2,3,4,5,6], note:"Atendimento todos os dias." },
+        { name:"Saúde e Vila Mariana", start:"04100-000", end:"04199-999", days:[1,2,3,4,5,6], note:"Atendimento todos os dias." },
+        { name:"Ipiranga e Sacomã", start:"04200-000", end:"04299-999", days:[1,2,3,4,5,6], note:"Atendimento todos os dias." },
+        { name:"Jabaquara e região", start:"04300-000", end:"04399-999", days:[1,2,3,4,5,6], note:"Atendimento todos os dias." },
+        { name:"Campo Belo", start:"04600-000", end:"04699-999", days:[1,2,3,4,5,6], note:"Atendimento todos os dias." },
+        { name:"Campo Limpo / região sul", start:"05750-000", end:"05750-999", days:[1,2,3,4,5,6], note:"Atendimento todos os dias." },
+        { name:"Campo Limpo / região sul", start:"05752-000", end:"05752-999", days:[1,2,3,4,5,6], note:"Atendimento todos os dias." },
+        { name:"Butantã / região oeste", start:"05600-000", end:"05699-999", days:[1,2,3,4,5,6], note:"Atendimento todos os dias." },
+        { name:"Cotia / Granja Viana", start:"06709-000", end:"06709-999", days:[2,6], note:"Atendimento às terças e sábados." },
+        { name:"Cotia / São Paulo II", start:"06706-005", end:"06706-165", days:[2,6], note:"Atendimento às terças e sábados." },
+        { name:"Taboão da Serra", start:"06750-000", end:"06765-000", days:[1,2,3,4,5,6], note:"Atendimento todos os dias." },
+        { name:"Zona Leste / Vila Prudente até Vila Ema", start:"03100-000", end:"03299-999", days:[1,6], note:"Atendimento às segundas e sábados." },
+        { name:"Zona Leste / Mooca até Vila Matilde", start:"03000-000", end:"03999-999", days:[1,6], note:"Atendimento às segundas e sábados." },
+        { name:"Zona Norte / Santana e Imirim", start:"02001-000", end:"02089-999", days:[1,6], note:"Atendimento às segundas e sábados." },
+        { name:"Tucuruvi", start:"02240-000", end:"02240-999", days:[1,6], note:"Atendimento às segundas e sábados." },
+        { name:"Tucuruvi", start:"02304-000", end:"02304-999", days:[1,6], note:"Atendimento às segundas e sábados." },
+        { name:"Tucuruvi", start:"02305-000", end:"02305-999", days:[1,6], note:"Atendimento às segundas e sábados." },
+        { name:"Pirituba / Jaraguá / Vila Jaguara", start:"05100-000", end:"05199-999", days:[1,6], note:"Atendimento às segundas e sábados." },
+        { name:"São Bernardo do Campo", start:"09700-000", end:"09799-999", days:[1,4], note:"Atendimento às segundas e quintas." },
+        { name:"São Caetano do Sul", start:"09500-000", end:"09599-999", days:[1,4], note:"Atendimento às segundas e quintas." },
+        { name:"Diadema", start:"09900-000", end:"09999-999", days:[1,4], note:"Atendimento às segundas e quintas." }
+      ];
+
+      const matchedCepRule = cepRules.find(rule => inCepRange(rule.start, rule.end));
+      if(matchedCepRule){
+        return { served:true, name:matchedCepRule.name, days:matchedCepRule.days, note:matchedCepRule.note, reason:"faixa-cep" };
+      }
+
+      const zonaSulTodosOsDias = [
+        "santo amaro", "socorro", "campo limpo", "capao redondo", "capão redondo",
+        "jardim sao luis", "jardim são luis", "jardim sao luiz", "jardim são luiz",
+        "campo belo", "saude", "saúde", "vila mariana", "ipiranga", "sacoma", "sacomã",
+        "jabaquara", "morumbi", "brooklin", "vila andrade", "paraisopolis", "paraisópolis"
+      ];
+      if(matchAny(zonaSulTodosOsDias)){
+        return { served:true, name:"Região Sul", days:[1,2,3,4,5,6], note:"Atendimento todos os dias.", reason:"rota-especifica" };
+      }
+
+      if(matchAny(["interlagos"])) {
+        return { served:true, name:"Interlagos", days:[1,3,5], note:"Atendimento às segundas, quartas e sextas.", reason:"rota-especifica" };
+      }
+
       const zonaLesteAtualizada = ["mooca", "alto da mooca", "parque da mooca", "vila prudente", "parque sao lucas", "sao lucas", "vila ema", "agua rasa", "penha de franca", "penha de frança", "vila matilde"];
-      if (zonaLesteAtualizada.some(r => bairro.includes(r))) {
+      if (matchAny(zonaLesteAtualizada)) {
         return { served:true, name:"Zona Leste (Mooca/VP/Penha/Matilde)", days:[1,6], note:"Atendimento às segundas e sábados.", reason:"rota-especifica" };
       }
 
-      if(bairro.includes("itaim bibi") || bairro.includes("butanta") || bairro.includes("butantã") || city.includes("osasco") || city.includes("taboao da serra") || bairro.includes("taboao")){
+      if(matchAny(["pirituba", "jaragua", "jaraguá", "vila jaguara", "tucuruvi", "imirim", "santana"])){
+        return { served:true, name:"Zona Norte/Leste", days:[1,6], note:"Atendimento às segundas e sábados.", reason:"rota-especifica" };
+      }
+
+      if(matchAny(["itaim bibi", "butanta", "butantã"]) || city.includes("osasco") || city.includes("taboao da serra") || city.includes("taboão da serra") || bairro.includes("taboao") || bairro.includes("taboão")){
         return { served:true, name:"Itaim/Butantã/Osasco/Taboão", days:[1,2,3,4,5,6], note:"Atendimento de segunda a sábado.", reason:"rota-especifica" };
       }
 
-      if(city.includes("cotia")){ return { served:true, name:"Cotia", days:[2,6], note:"Atendimento às terças e sábados.", reason:"rota-especifica" }; }
-      if(bairro.includes("vila joaniza")){ return { served:true, name:"Vila Joaniza", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" }; }
-      if(bairro.includes("interlagos")){ return { served:true, name:"Interlagos", days:[1,3,5], note:"Atendimento às segundas, quartas e sextas.", reason:"rota-especifica" }; }
-      if(bairro.includes("guarapiranga") || bairro.includes("santo amaro")){ return { served:true, name:"Região Sul / até Interlagos", days:[1,2,3,4,5,6], note:"Atendimento diário na região cadastrada.", reason:"rota-especifica" }; }
+      if(city.includes("cotia")){
+        return { served:true, name:"Cotia", days:[2,6], note:"Atendimento às terças e sábados.", reason:"rota-especifica" };
+      }
+
+      if(matchAny(["vila joaniza"])) {
+        return { served:true, name:"Vila Joaniza", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" };
+      }
 
       const sbcBairros = ["baeta neves", "ferrazopolis", "ferrazópolis", "planalto", "demarchi", "centro"];
       if (city.includes("sao bernardo do campo") || city.includes("são bernardo do campo")) {
-        if (sbcBairros.some(r => bairro.includes(r))) return { served:true, name:"São Bernardo do Campo", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" };
+        if (matchAny(sbcBairros)) return { served:true, name:"São Bernardo do Campo", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" };
         return { served:false, name:"São Bernardo do Campo", days:[], note:"Atendemos apenas bairros específicos.", reason:"fora-da-lista" };
       }
 
       const santoAndreBairros = ["vila assuncao", "vila assunção", "centro", "jardim", "campestre", "utinga", "jardim utinga", "jardim das maravilhas", "vila metalurgica", "vila metalúrgica", "vila camilopolis", "vila camilópolis", "parque das nacoes", "parque das nações", "vila lucinda", "vila francisco matarazzo", "vila bartira", "bangu", "vila sao pedro", "vila são pedro", "santa teresinha", "vila bastos", "vila guiomar"];
       if (city.includes("santo andre") || city.includes("santo andré")) {
-        if (santoAndreBairros.some(r => bairro.includes(r))) return { served:true, name:"Santo André", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" };
+        if (matchAny(santoAndreBairros)) return { served:true, name:"Santo André", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" };
         return { served:false, name:"Santo André", days:[], note:"Atendemos apenas bairros específicos.", reason:"fora-da-lista" };
       }
 
       const diademaBairros = ["centro", "conceicao", "conceição", "serraria"];
       if (city.includes("diadema")) {
-        if (diademaBairros.some(r => bairro.includes(r))) return { served:true, name:"Diadema", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" };
+        if (matchAny(diademaBairros)) return { served:true, name:"Diadema", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" };
         return { served:false, name:"Diadema", days:[], note:"Atendemos apenas bairros específicos.", reason:"fora-da-lista" };
       }
 
-      if (city.includes("sao caetano do sul") || city.includes("são caetano do sul")){ return { served:true, name:"São Caetano do Sul", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" }; }
-
-      const antigaZonaNorteLeste = ["tatuape", "tatuapé", "pirituba", "imirim", "tucuruvi", "santana"];
-      if (antigaZonaNorteLeste.some(r => bairro.includes(r))) return { served:true, name:"Zona Norte/Leste", days:[1,6], note:"Atendimento às segundas e sábados.", reason:"rota-especifica" };
+      if (city.includes("sao caetano do sul") || city.includes("são caetano do sul")){
+        return { served:true, name:"São Caetano do Sul", days:[1,4], note:"Atendimento às segundas e quintas.", reason:"rota-especifica" };
+      }
 
       return { served:false, name:"Região fora da rota cadastrada", days:[], note:"Sua região não está entre as rotas automáticas cadastradas.", reason:"fora-da-lista" };
     }
-
 
     function computeDeliveryInfo(route){
       const now = new Date();
